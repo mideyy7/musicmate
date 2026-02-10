@@ -1,4 +1,4 @@
-#Create this folder structure
+#Folder structure and their purpose
 
 backend/
 ├── app/
