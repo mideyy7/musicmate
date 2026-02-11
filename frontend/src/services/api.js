@@ -56,3 +56,31 @@ export function updateProfile(updates) {
     body: JSON.stringify(updates),
   });
 }
+
+// Spotify
+export function getSpotifyAuthUrl() {
+  return request('/spotify/auth-url');
+}
+
+export function spotifyCallback(code) {
+  return request('/spotify/callback', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+}
+
+export function getSpotifyStatus() {
+  return request('/spotify/status');
+}
+
+export function syncSpotifyProfile() {
+  return request('/spotify/sync', { method: 'POST' });
+}
+
+export function getMusicProfile() {
+  return request('/spotify/profile');
+}
+
+export function disconnectSpotify() {
+  return request('/spotify/disconnect', { method: 'DELETE' });
+}

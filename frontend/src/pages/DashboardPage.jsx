@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { updateProfile } from '../services/api';
+import { updateProfile, getSpotifyAuthUrl, getSpotifyStatus, getMusicProfile } from '../services/api';
+import MusicProfile from '../components/MusicProfile';
 
 export default function DashboardPage() {
   const { user, logout, updateUser } = useAuth();
@@ -8,6 +9,42 @@ export default function DashboardPage() {
   const [formData, setFormData] = useState({});
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+
+  // Spotify state
+  const [spotifyConnected, setSpotifyConnected] = useState(false);
+  const [musicProfile, setMusicProfile] = useState(null);
+  const [spotifyLoading, setSpotifyLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadSpotifyData() {
+      try {
+        const status = await getSpotifyStatus();
+        setSpotifyConnected(status.connected);
+        if (status.connected) {
+          try {
+            const profile = await getMusicProfile();
+            setMusicProfile(profile);
+          } catch {
+            // Profile not synced yet — that's fine
+          }
+        }
+      } catch {
+        // Spotify not connected
+      } finally {
+        setSpotifyLoading(false);
+      }
+    }
+    loadSpotifyData();
+  }, []);
+
+  async function handleConnectSpotify() {
+    try {
+      const { auth_url } = await getSpotifyAuthUrl();
+      window.location.href = auth_url;
+    } catch (err) {
+      setMessage(err.message);
+    }
+  }
 
   function startEditing() {
     setFormData({
@@ -63,6 +100,7 @@ export default function DashboardPage() {
         </button>
       </header>
 
+      {/* Profile Card */}
       <div className="profile-card">
         <div className="profile-header">
           <div className="avatar">{user.display_name[0].toUpperCase()}</div>
@@ -223,6 +261,43 @@ export default function DashboardPage() {
               </button>
             </div>
           </form>
+        )}
+      </div>
+
+      {/* Spotify Section */}
+      <div className="spotify-section">
+        {spotifyLoading ? (
+          <div className="spotify-card">
+            <p className="text-muted">Loading Spotify status...</p>
+          </div>
+        ) : !spotifyConnected ? (
+          <div className="spotify-card spotify-connect-card">
+            <div className="spotify-connect-content">
+              <h3>Connect Your Spotify</h3>
+              <p>Link your Spotify account to build your music profile and find matches.</p>
+              <button onClick={handleConnectSpotify} className="btn-spotify">
+                Connect Spotify
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {musicProfile ? (
+              <MusicProfile
+                profile={musicProfile}
+                onUpdate={setMusicProfile}
+                onDisconnect={() => {
+                  setSpotifyConnected(false);
+                  setMusicProfile(null);
+                }}
+              />
+            ) : (
+              <div className="spotify-card">
+                <h3>Spotify Connected</h3>
+                <p className="text-muted">Your profile is being set up. Try refreshing.</p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

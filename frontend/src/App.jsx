@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import SSOPage from './pages/SSOPage';
 import OnboardingPage from './pages/OnboardingPage';
 import DashboardPage from './pages/DashboardPage';
+import SpotifyCallbackPage from './pages/SpotifyCallbackPage';
 import './App.css';
 
 function App() {
@@ -20,6 +21,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/spotify/callback"
+            element={
+              <ProtectedRoute>
+                <SpotifyCallbackPage />
               </ProtectedRoute>
             }
           />

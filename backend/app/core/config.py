@@ -12,6 +12,10 @@ class Settings(BaseSettings):
         "student.manchester.ac.uk",
     ]
 
+    SPOTIFY_CLIENT_ID: str = ""
+    SPOTIFY_CLIENT_SECRET: str = ""
+    SPOTIFY_REDIRECT_URI: str = "http://localhost:5173/spotify/callback"
+
     class Config:
         env_file = ".env"
 
