@@ -1,12 +1,31 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-app = FastAPI()
+from app.core.database import Base, engine
+from app.api.routes.auth import router as auth_router
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="MusicMate API")
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Register routers
+app.include_router(auth_router)
 
 
 @app.get("/")
 def root():
-    return {"message": "FastAPI server is running 🚀"}
+    return {"message": "MusicMate API is running"}
 
 
 if __name__ == "__main__":
@@ -14,5 +33,5 @@ if __name__ == "__main__":
         "app.main:app",
         host="127.0.0.1",
         port=8000,
-        reload=True
+        reload=True,
     )
