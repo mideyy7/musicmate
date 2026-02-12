@@ -1,0 +1,159 @@
+.page{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;   /* horizontal */
+    align-items: center;       /* vertical */
+}
+
+
+.main_con{
+    background-image: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    width: 400px;
+    height: 350px;
+    text-align: left;
+    border-radius: 5%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.create_container{
+    width: 100%;
+    max-width: 300px;
+    padding: 20px;
+}
+.button{
+    margin: auto;
+    border-radius: 20px 20px;
+    text-align: center;
+    font-size: 16px;
+    width: 100%;
+    height: 2.5em;
+    margin-top: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.input{
+    background-color: rgba(255,255,255,0.05);
+    border: #8a6fe8;
+    width: 100%;
+    height: 25px;
+    border-radius: 10px 10px;
+    color: #FFFFFF;
+}
+#account{
+    display: inline;
+    margin: auto;
+    text-align: center;
+}
+.accLogin{
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 15px;
+}
+
+#hyperlink{
+    font-size: 14px;
+    margin-left: 5px;
+}
+#hyperlink:link{
+    text-decoration: none;
+    color: #8a6fe8;
+}
+.label {
+    font-size: 12px;
+    color: #FFFFFF;
+    padding-top: 20%;
+    line-height: 1.6;
+}
+
+#signup{
+    background-color: #8a6fe8;
+    border: 1px solid #8a6fe8;
+    color: #FFFFFF;
+}
+#signup:hover{
+    background-color: #735ac4;
+}
+
+h3{
+    color: #FFFFFF;
+    padding: 0%;
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 5px;
+    margin-top: 0;
+}
+p{
+    color: #FFFFFF;
+    font-size: 14px;
+    padding-top: 0%;
+    text-align: center;
+    display: inline;
+}
+
+h2{
+    color: #FFFFFF;
+    font-size: 16px;
+    padding-top: 0%;
+    padding-bottom: 20px;
+    text-align: center;
+    margin: 0;
+}
+
+
+
+/* Floating Label Animation Styles */
+.entryArea {
+    position: relative;
+    width: 100%;
+    height: 60px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.animatedInput {
+    outline: none;
+    width: 100%;
+    font-size: 1em;
+    border-radius: 10px;
+    padding: 0 15px;
+    line-height: 40px;
+    height: 40px;
+    border: 2px solid #8a6fe8;
+    background: rgba(255,255,255,0.05);
+    transition: 0.1s ease;
+    z-index: 1;
+    color: #FFFFFF;
+}
+
+.active {
+    color: #ffffff !important;
+    border: 3px solid #8a6fe8 !important;
+    background: rgba(138, 111, 232, 0.1) !important;
+}
+
+.labelLine {
+    position: absolute;
+    color: #FFFFFF;
+    font-size: 0.9em;
+    padding: 0 8px;
+    margin-left: 10px;
+    transition: 0.2s ease;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    pointer-events: none;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+}
+
+.labelActive {
+    color: #8a6fe8;
+    font-size: 0.9em;
+    top: 0;
+    transform: translateY(10%);
+    font-weight: bold;
+}

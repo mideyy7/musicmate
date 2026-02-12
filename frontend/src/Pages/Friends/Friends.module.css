@@ -1,0 +1,90 @@
+.main_con {
+  width: 320px;
+  background-color: #3d3c60;
+  border-radius: 28px;
+  overflow: hidden;
+  margin: auto;
+  padding-bottom: 18px;
+  /* margin-top: 100px; */
+}
+
+.profile_con {
+  width: 100%;
+  height: 260px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile_img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.user_con {
+  padding: 16px 20px 0 20px;
+}
+
+.name_con {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  height: 40px;
+}
+
+.name_con h2 {
+  margin: 0;
+  font-size: 28px;
+  color: #ffffff;
+}
+
+.subtitle_con {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.subtitle_con h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #8a6fe8;
+}
+
+.description_con {
+  margin-top: 10px;
+}
+
+.description_con p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;    /* change 3 to the number of lines you want */
+  line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tag_con {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+  padding: 14px 20px 0 20px;
+}
+
+.item {
+  background-color: #8a6fe8;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  font-size: 14px;
+}
+
