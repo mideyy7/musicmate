@@ -1,0 +1,16 @@
+.nav_left {
+    display: flex;
+    align-items: center; 
+    gap: 0.5rem;
+    margin-right: auto;
+    height: 60px;
+    font-size: 0.9em;
+}
+.nav_left h1 {
+    margin: 0; 
+    color: white;
+}
+.nav_left img{
+    height: 70px;
+    margin: none;
+}
