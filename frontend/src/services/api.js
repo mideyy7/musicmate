@@ -84,3 +84,24 @@ export function getMusicProfile() {
 export function disconnectSpotify() {
   return request('/spotify/disconnect', { method: 'DELETE' });
 }
+
+// Match
+export function getMatchFeed(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.course) params.set('course', filters.course);
+  if (filters.year) params.set('year', filters.year);
+  if (filters.faculty) params.set('faculty', filters.faculty);
+  const qs = params.toString();
+  return request(`/match/feed${qs ? `?${qs}` : ''}`);
+}
+
+export function swipe(targetUserId, action) {
+  return request('/match/swipe', {
+    method: 'POST',
+    body: JSON.stringify({ target_user_id: targetUserId, action }),
+  });
+}
+
+export function getMatches() {
+  return request('/match/matches');
+}

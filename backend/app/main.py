@@ -3,9 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from app.core.database import Base, engine
-from app.models import User, SpotifyToken, MusicProfile  # noqa: F401
+from app.models import User, SpotifyToken, MusicProfile, Swipe, Match  # noqa: F401
 from app.api.routes.auth import router as auth_router
 from app.api.routes.spotify import router as spotify_router
+from app.api.routes.match import router as match_router
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -24,6 +25,7 @@ app.add_middleware(
 # Register routers
 app.include_router(auth_router)
 app.include_router(spotify_router)
+app.include_router(match_router)
 
 
 @app.get("/")

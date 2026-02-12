@@ -19,5 +19,6 @@ class User(Base):
     show_course = Column(Boolean, default=True)
     show_year = Column(Boolean, default=True)
     show_faculty = Column(Boolean, default=True)
+    spotify_email = Column(String, nullable=True)
     is_verified = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)

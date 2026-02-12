@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile, getSpotifyAuthUrl, getSpotifyStatus, getMusicProfile } from '../services/api';
 import MusicProfile from '../components/MusicProfile';
+import NavBar from '../components/NavBar';
 
 export default function DashboardPage() {
   const { user, logout, updateUser } = useAuth();
@@ -14,8 +15,14 @@ export default function DashboardPage() {
   const [spotifyConnected, setSpotifyConnected] = useState(false);
   const [musicProfile, setMusicProfile] = useState(null);
   const [spotifyLoading, setSpotifyLoading] = useState(true);
+  const [spotifyEmail, setSpotifyEmail] = useState('');
+  const [spotifyEmailError, setSpotifyEmailError] = useState('');
 
   useEffect(() => {
+    if (user.spotify_email) {
+      setSpotifyEmail(user.spotify_email);
+    }
+
     async function loadSpotifyData() {
       try {
         const status = await getSpotifyStatus();
@@ -38,11 +45,22 @@ export default function DashboardPage() {
   }, []);
 
   async function handleConnectSpotify() {
+    if (!spotifyEmail.trim()) {
+      setSpotifyEmailError('Please enter your Spotify email address.');
+      return;
+    }
+    setSpotifyEmailError('');
+
     try {
+      // Save the Spotify email to the user profile first
+      const updatedUser = await updateProfile({ spotify_email: spotifyEmail.trim() });
+      updateUser(updatedUser);
+
+      // Then redirect to Spotify OAuth
       const { auth_url } = await getSpotifyAuthUrl();
       window.location.href = auth_url;
     } catch (err) {
-      setMessage(err.message);
+      setSpotifyEmailError(err.message);
     }
   }
 
@@ -92,7 +110,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="dashboard-container">
+    <div className="page-container">
+      <div className="dashboard-container">
       <header className="dashboard-header">
         <h1>MusicMate</h1>
         <button onClick={logout} className="btn-secondary">
@@ -149,6 +168,12 @@ export default function DashboardPage() {
                   {user.faculty}
                   {!user.show_faculty && <span className="hidden-badge">Hidden</span>}
                 </span>
+              </div>
+            )}
+            {user.spotify_email && (
+              <div className="detail-row">
+                <span className="detail-label">Spotify</span>
+                <span>{user.spotify_email}</span>
               </div>
             )}
             <div className="detail-row">
@@ -274,10 +299,30 @@ export default function DashboardPage() {
           <div className="spotify-card spotify-connect-card">
             <div className="spotify-connect-content">
               <h3>Connect Your Spotify</h3>
-              <p>Link your Spotify account to build your music profile and find matches.</p>
-              <button onClick={handleConnectSpotify} className="btn-spotify">
-                Connect Spotify
-              </button>
+              <p>
+                Your MusicMate account uses your university email. Enter the email
+                associated with your Spotify account to link it.
+              </p>
+              <div className="spotify-email-form">
+                <div className="form-group">
+                  <label htmlFor="spotify-email">Spotify Email</label>
+                  <input
+                    id="spotify-email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={spotifyEmail}
+                    onChange={(e) => setSpotifyEmail(e.target.value)}
+                  />
+                </div>
+                {spotifyEmailError && (
+                  <div className="error-message" style={{ marginBottom: '0.75rem' }}>
+                    {spotifyEmailError}
+                  </div>
+                )}
+                <button onClick={handleConnectSpotify} className="btn-spotify">
+                  Connect Spotify
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -300,6 +345,8 @@ export default function DashboardPage() {
           </>
         )}
       </div>
+      </div>
+      <NavBar />
     </div>
   );
 }

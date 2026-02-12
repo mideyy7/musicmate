@@ -6,6 +6,8 @@ import SSOPage from './pages/SSOPage';
 import OnboardingPage from './pages/OnboardingPage';
 import DashboardPage from './pages/DashboardPage';
 import SpotifyCallbackPage from './pages/SpotifyCallbackPage';
+import SwipePage from './pages/SwipePage';
+import MatchesPage from './pages/MatchesPage';
 import './App.css';
 
 function App() {
@@ -21,6 +23,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/discover"
+            element={
+              <ProtectedRoute>
+                <SwipePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/matches"
+            element={
+              <ProtectedRoute>
+                <MatchesPage />
               </ProtectedRoute>
             }
           />

@@ -41,6 +41,7 @@ class ProfileUpdate(BaseModel):
     show_course: bool | None = None
     show_year: bool | None = None
     show_faculty: bool | None = None
+    spotify_email: str | None = None
 
 
 class UserResponse(BaseModel):
@@ -54,6 +55,7 @@ class UserResponse(BaseModel):
     show_course: bool
     show_year: bool
     show_faculty: bool
+    spotify_email: str | None
     is_verified: bool
     created_at: datetime
 

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -25,8 +25,10 @@ from app.services.spotify import (
     fetch_recent_tracks,
     fetch_top_artists,
     fetch_top_tracks,
+    generate_mock_profile,
     get_auth_url,
     get_spotify_user_id,
+    is_mock_mode,
     refresh_access_token,
 )
 
@@ -66,6 +68,8 @@ def _get_valid_token(db: Session, user_id: int) -> str:
 @router.get("/auth-url", response_model=SpotifyAuthURL)
 def spotify_auth_url(current_user: User = Depends(get_current_user)):
     """Get Spotify authorization URL to start OAuth flow."""
+    if is_mock_mode():
+        return SpotifyAuthURL(auth_url="mock://spotify/authorize")
     url = get_auth_url(state=str(current_user.id))
     return SpotifyAuthURL(auth_url=url)
 
@@ -77,6 +81,18 @@ def spotify_callback(
     db: Session = Depends(get_db),
 ):
     """Exchange Spotify auth code for tokens and store them."""
+    if is_mock_mode():
+        mock_spotify_id = f"mock_user_{current_user.id}"
+        save_spotify_tokens(
+            db,
+            user_id=current_user.id,
+            access_token="mock_access_token",
+            refresh_token="mock_refresh_token",
+            expires_at=datetime.utcnow() + timedelta(hours=1),
+            spotify_user_id=mock_spotify_id,
+        )
+        return SpotifyStatusResponse(connected=True, spotify_user_id=mock_spotify_id)
+
     try:
         tokens = exchange_code(request.code)
     except Exception as e:
@@ -105,6 +121,8 @@ def spotify_status(
     db: Session = Depends(get_db),
 ):
     """Check if Spotify is connected for the current user."""
+    if is_mock_mode():
+        return SpotifyStatusResponse(connected=True, spotify_user_id=f"mock_user_{current_user.id}")
     tokens = get_spotify_tokens(db, current_user.id)
     if tokens:
         return SpotifyStatusResponse(connected=True, spotify_user_id=tokens.spotify_user_id)
@@ -117,19 +135,21 @@ def spotify_sync(
     db: Session = Depends(get_db),
 ):
     """Fetch latest Spotify data and build/update music profile."""
-    access_token = _get_valid_token(db, current_user.id)
+    if is_mock_mode():
+        profile_data = generate_mock_profile(current_user.id)
+    else:
+        access_token = _get_valid_token(db, current_user.id)
+        try:
+            top_artists = fetch_top_artists(access_token)
+            top_tracks = fetch_top_tracks(access_token)
+            recent_tracks = fetch_recent_tracks(access_token)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Failed to fetch Spotify data: {str(e)}",
+            )
+        profile_data = build_music_profile(top_artists, top_tracks, recent_tracks)
 
-    try:
-        top_artists = fetch_top_artists(access_token)
-        top_tracks = fetch_top_tracks(access_token)
-        recent_tracks = fetch_recent_tracks(access_token)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Failed to fetch Spotify data: {str(e)}",
-        )
-
-    profile_data = build_music_profile(top_artists, top_tracks, recent_tracks)
     profile = save_music_profile(db, current_user.id, profile_data)
 
     return MusicProfileResponse(
