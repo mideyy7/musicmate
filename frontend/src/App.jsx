@@ -1,33 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-
+import SignUp from "./Pages/SignUp/SignUp.jsx"
+import SignIn from './Pages/SignIn/SignIn.jsx'
+import Match from './Pages/Match/Match.jsx'
+import FriendsPage from './Pages/Friends/FriendsPage.jsx'
+import Post from './Pages/Post/Post.jsx'
+import Feed from './Pages/Feed/Feed.jsx'
+import Home from './Pages/index/index.jsx'
+import TestPage from './Pages/Testpage/TestPage.jsx'
+import NavBar from "./Components/NavBar/NavBar.jsx";
+import {BrowserRouter as Router, Routes, Route,} from "react-router-dom";
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Router>
+            <NavBar />
+            <Routes>
+                <Route exact path="/index" element={<Home />} />
+                <Route path="/Match" element={<Match />} />
+                <Route path="/FriendsPage" element={<FriendsPage />} />
+                <Route path="/Post" element={<Post />} />
+                <Route path="/Feed" element={<Feed />} />
+                <Route path="/SignUp" element={<SignUp />} />
+                <Route path="/TestPage" element={<TestPage />} />
+                <Route path="/SignIn" element={<SignIn />} />
+                
+
+            </Routes>
+        </Router>
+  
     </>
   )
 }
