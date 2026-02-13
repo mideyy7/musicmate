@@ -122,6 +122,11 @@ def spotify_status(
 ):
     """Check if Spotify is connected for the current user."""
     if is_mock_mode():
+        # In mock mode, auto-generate a profile if one doesn't exist yet
+        profile = get_music_profile(db, current_user.id)
+        if not profile:
+            profile_data = generate_mock_profile(current_user.id)
+            save_music_profile(db, current_user.id, profile_data)
         return SpotifyStatusResponse(connected=True, spotify_user_id=f"mock_user_{current_user.id}")
     tokens = get_spotify_tokens(db, current_user.id)
     if tokens:
