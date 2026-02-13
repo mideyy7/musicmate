@@ -21,6 +21,7 @@ from app.schemas.match import (
     SwipeResponse,
 )
 from app.services.compatibility import compute_compatibility
+from app.services.spotify import is_mock_mode
 
 router = APIRouter(prefix="/api/match", tags=["match"])
 
@@ -111,6 +112,12 @@ def swipe(
         )
 
     create_swipe(db, current_user.id, request.target_user_id, request.action)
+
+    # In mock mode, auto-generate a reciprocal like so testing works with a single user
+    if request.action == "like" and is_mock_mode():
+        reverse = get_swipe(db, request.target_user_id, current_user.id)
+        if not reverse:
+            create_swipe(db, request.target_user_id, current_user.id, "like")
 
     is_match = False
     match_id = None
