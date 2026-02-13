@@ -133,3 +133,53 @@ export function searchSong(query) {
 export function getChatPrompts() {
   return request('/chat/prompts/list');
 }
+
+// Playlists
+export function getPlaylists() {
+  return request('/playlist');
+}
+
+export function getPlaylist(playlistId) {
+  return request(`/playlist/${playlistId}`);
+}
+
+export function createPlaylist(data) {
+  return request('/playlist', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export function addTrackToPlaylist(playlistId, track) {
+  return request(`/playlist/${playlistId}/tracks`, {
+    method: 'POST',
+    body: JSON.stringify(track),
+  });
+}
+
+export function removeTrackFromPlaylist(playlistId, spotifyId) {
+  return request(`/playlist/${playlistId}/tracks/${spotifyId}`, {
+    method: 'DELETE',
+  });
+}
+
+export function addPlaylistMember(playlistId, userId) {
+  return request(`/playlist/${playlistId}/members`, {
+    method: 'POST',
+    body: JSON.stringify({ user_id: userId }),
+  });
+}
+
+export function removePlaylistMember(playlistId, userId) {
+  return request(`/playlist/${playlistId}/members/${userId}`, {
+    method: 'DELETE',
+  });
+}
+
+export function getWeeklyRecap(playlistId) {
+  return request(`/playlist/${playlistId}/recap`);
+}
+
+export function autoCreatePlaylist(matchId) {
+  return request(`/playlist/auto-create/${matchId}`, { method: 'POST' });
+}

@@ -78,7 +78,7 @@ SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
 SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_API_BASE = "https://api.spotify.com/v1"
 
-SCOPES = "user-top-read user-read-recently-played user-read-playback-state user-library-read"
+SCOPES = "user-top-read user-read-recently-played user-read-playback-state user-library-read playlist-modify-public playlist-modify-private"
 
 
 def get_auth_url(state: str = "") -> str:
@@ -239,3 +239,48 @@ def build_music_profile(top_artists: list[dict], top_tracks: list[dict], recent_
         "recent_tracks": recent_tracks,
         "listening_patterns": listening_patterns,
     }
+
+
+# --- Playlist functions ---
+
+def create_spotify_playlist(access_token: str, user_spotify_id: str, name: str, description: str = "") -> str:
+    """Create a playlist on Spotify. Returns the playlist ID."""
+    if is_mock_mode():
+        return f"mock_playlist_{name.replace(' ', '_').lower()}"
+
+    response = httpx.post(
+        f"{SPOTIFY_API_BASE}/users/{user_spotify_id}/playlists",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={"name": name, "description": description, "public": False},
+    )
+    response.raise_for_status()
+    return response.json()["id"]
+
+
+def add_tracks_to_spotify_playlist(access_token: str, playlist_id: str, track_uris: list[str]) -> bool:
+    """Add tracks to a Spotify playlist."""
+    if is_mock_mode():
+        return True
+
+    response = httpx.post(
+        f"{SPOTIFY_API_BASE}/playlists/{playlist_id}/tracks",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={"uris": track_uris},
+    )
+    response.raise_for_status()
+    return True
+
+
+def remove_tracks_from_spotify_playlist(access_token: str, playlist_id: str, track_uris: list[str]) -> bool:
+    """Remove tracks from a Spotify playlist."""
+    if is_mock_mode():
+        return True
+
+    response = httpx.request(
+        "DELETE",
+        f"{SPOTIFY_API_BASE}/playlists/{playlist_id}/tracks",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={"tracks": [{"uri": uri} for uri in track_uris]},
+    )
+    response.raise_for_status()
+    return True

@@ -8,6 +8,7 @@ export default function NavBar() {
     { path: '/dashboard', label: 'Profile', icon: '♪' },
     { path: '/discover', label: 'Discover', icon: '♡' },
     { path: '/matches', label: 'Matches', icon: '★' },
+    { path: '/playlists', label: 'Playlists', icon: '♫' },
   ];
 
   return (

@@ -11,6 +11,7 @@ from app.crud.match import (
     get_matches,
     get_swipe,
 )
+from app.crud.playlist import add_member as add_playlist_member, create_playlist, get_playlist_by_match
 from app.crud.spotify import get_music_profile
 from app.models.user import User
 from app.schemas.match import (
@@ -147,6 +148,9 @@ def swipe(
         is_match = True
         match_id = match.id
 
+        # Auto-create shared playlist for the match
+        _auto_create_playlist(db, match, current_user, request.target_user_id, breakdown)
+
     return SwipeResponse(
         message="It's a match!" if is_match else "Swipe recorded.",
         is_match=is_match,
@@ -228,3 +232,53 @@ def match_detail(
         ),
         created_at=match.created_at,
     )
+
+
+def _auto_create_playlist(db: Session, match, current_user, target_user_id: int, breakdown: dict):
+    """Create a shared playlist when a match is formed."""
+    from datetime import datetime
+
+    existing = get_playlist_by_match(db, match.id)
+    if existing:
+        return
+
+    other_user = db.query(User).filter(User.id == target_user_id).first()
+    if not other_user:
+        return
+
+    # Build initial tracks from shared artists
+    my_profile = get_music_profile(db, current_user.id)
+    their_profile = get_music_profile(db, target_user_id)
+
+    initial_tracks = []
+    if my_profile and their_profile:
+        shared_artist_names = set(breakdown.get("shared_artists", []))
+        all_tracks = (my_profile.recent_tracks or []) + (their_profile.recent_tracks or [])
+        seen_ids = set()
+        for t in all_tracks:
+            if t.get("artist") in shared_artist_names and t.get("spotify_id") not in seen_ids:
+                seen_ids.add(t["spotify_id"])
+                initial_tracks.append({
+                    "track_name": t.get("name", ""),
+                    "artist": t.get("artist", ""),
+                    "album": t.get("album", ""),
+                    "image_url": t.get("image_url"),
+                    "spotify_url": None,
+                    "spotify_id": t["spotify_id"],
+                    "added_by": current_user.id,
+                    "added_at": datetime.utcnow().isoformat(),
+                })
+
+    playlist_name = f"{current_user.display_name} & {other_user.display_name}'s Mix"
+    playlist = create_playlist(
+        db,
+        name=playlist_name,
+        created_by=current_user.id,
+        playlist_type="match",
+        description=f"Shared playlist from your {match.compatibility_score:.0f}% music match!",
+        match_id=match.id,
+        tracks=initial_tracks,
+    )
+
+    add_playlist_member(db, playlist.id, current_user.id, role="owner")
+    add_playlist_member(db, playlist.id, target_user_id, role="owner")

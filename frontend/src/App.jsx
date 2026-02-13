@@ -9,6 +9,8 @@ import SpotifyCallbackPage from './pages/SpotifyCallbackPage';
 import SwipePage from './pages/SwipePage';
 import MatchesPage from './pages/MatchesPage';
 import ChatPage from './pages/ChatPage';
+import PlaylistsPage from './pages/PlaylistsPage';
+import PlaylistDetailPage from './pages/PlaylistDetailPage';
 import './App.css';
 
 function App() {
@@ -40,6 +42,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <MatchesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/playlists"
+            element={
+              <ProtectedRoute>
+                <PlaylistsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/playlists/:playlistId"
+            element={
+              <ProtectedRoute>
+                <PlaylistDetailPage />
               </ProtectedRoute>
             }
           />
