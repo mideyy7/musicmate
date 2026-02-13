@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react';
-import { getMatches } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { getMatches, getUnreadCount } from '../services/api';
 import NavBar from '../components/NavBar';
 
 export default function MatchesPage() {
+  const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expanded, setExpanded] = useState(null);
+  const [unreadByMatch, setUnreadByMatch] = useState({});
 
   useEffect(() => {
     loadMatches();
+    loadUnread();
   }, []);
 
   async function loadMatches() {
@@ -20,6 +24,15 @@ export default function MatchesPage() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadUnread() {
+    try {
+      const data = await getUnreadCount();
+      setUnreadByMatch(data.by_match || {});
+    } catch {
+      // ignore
     }
   }
 
@@ -67,8 +80,22 @@ export default function MatchesPage() {
                       {match.other_user.year && <span>Year {match.other_user.year}</span>}
                     </div>
                   </div>
-                  <div className="match-card-score">
-                    <span className="score-value">{Math.round(match.compatibility_score)}%</span>
+                  <div className="match-card-actions">
+                    <div className="match-card-score">
+                      <span className="score-value">{Math.round(match.compatibility_score)}%</span>
+                    </div>
+                    <button
+                      className="chat-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/chat/${match.id}`);
+                      }}
+                    >
+                      Chat
+                      {unreadByMatch[match.id] > 0 && (
+                        <span className="unread-badge">{unreadByMatch[match.id]}</span>
+                      )}
+                    </button>
                   </div>
                 </div>
 

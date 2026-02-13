@@ -8,6 +8,7 @@ import DashboardPage from './pages/DashboardPage';
 import SpotifyCallbackPage from './pages/SpotifyCallbackPage';
 import SwipePage from './pages/SwipePage';
 import MatchesPage from './pages/MatchesPage';
+import ChatPage from './pages/ChatPage';
 import './App.css';
 
 function App() {
@@ -39,6 +40,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <MatchesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chat/:matchId"
+            element={
+              <ProtectedRoute>
+                <ChatPage />
               </ProtectedRoute>
             }
           />

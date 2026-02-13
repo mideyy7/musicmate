@@ -105,3 +105,31 @@ export function swipe(targetUserId, action) {
 export function getMatches() {
   return request('/match/matches');
 }
+
+// Chat
+export function getConversation(matchId, limit = 50, offset = 0) {
+  return request(`/chat/${matchId}?limit=${limit}&offset=${offset}`);
+}
+
+export function sendMessage(matchId, data) {
+  return request(`/chat/${matchId}`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export function markAsRead(matchId) {
+  return request(`/chat/${matchId}/read`, { method: 'PUT' });
+}
+
+export function getUnreadCount() {
+  return request('/chat/unread/count');
+}
+
+export function searchSong(query) {
+  return request(`/chat/search-song/results?q=${encodeURIComponent(query)}`);
+}
+
+export function getChatPrompts() {
+  return request('/chat/prompts/list');
+}
