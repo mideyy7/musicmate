@@ -1,5 +1,6 @@
 import { useState } from "react";
-import styles from "./SignIn.module.css"
+import styles from "../SignUp/SignUp.module.css"
+import { Link } from "react-router-dom";
 
 function SignIn (){
     const [formData, setFormData] = useState({
@@ -27,10 +28,10 @@ function SignIn (){
       const isActive = (field) => focusedField[field] || formData[field].length > 0;
     return (
         <div className={styles.page}>
-              <form className={styles.main_con} method="post" action="./Authenticator.php">
+              <form className={styles.main_con} id={styles.signin_con} method="post" action="./Authenticator.php">
                 <div className={styles.create_container}>
-                  <h3>Sign In</h3>
-                  <h2>Sign in to continue</h2>
+                  <h3>Welcome Back</h3>
+                  <h2>Please sign in to continue</h2>
                   
                   <div className={styles.entryArea}>
                     <input
@@ -62,9 +63,15 @@ function SignIn (){
                     Password
                     </div>
                   </div>
+                  <div className={styles.accLogin} id={styles.forgot_pass}>
+                    <Link to="/Forgetten" id={styles.hyperlink}>Forgot Password?</Link>
+                  </div>
                   <button className={styles.button} id={styles.signup}>
-                              Sign In
-                            </button>
+                    Sign In
+                  </button>
+                  <div className={styles.accLogin}>
+                    <p id={styles.account}>Don't have an account?<Link to="/SignUp" id={styles.hyperlink}>Register</Link></p>
+                  </div>
                 </div>
             </form>
         </div>        

@@ -6,9 +6,14 @@
     align-items: center;       
 }
 
+#signin_con{
+    height: 400px;
+}
+
 
 .main_con{
-    background-image: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    /* background-image: linear-gradient(135deg, #0f0c29, #302b63, #24243e); */
+    background-color: #3d3c60;
     width: 400px;
     height: 600px;
     text-align: left;
@@ -16,6 +21,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
 }
 .create_container{
     width: 100%;
@@ -81,6 +87,11 @@
 }
 #signup:hover{
     background-color: #735ac4;
+}
+
+#forgot_pass{
+    margin: 0px;
+    justify-content: end;
 }
 
 h3{
@@ -162,7 +173,7 @@ h2{
     line-height: 40px;
     height: 40px;
     border: 2px solid #8a6fe8;
-    background: rgba(255,255,255,0.05);
+    background: transparent;
     transition: 0.1s ease;
     z-index: 1;
     color: #FFFFFF;
@@ -171,7 +182,8 @@ h2{
 .active {
     color: #ffffff !important;
     border: 3px solid #8a6fe8 !important;
-    background: rgba(138, 111, 232, 0.1) !important;
+    /* background: rgba(138, 111, 232, 0.1) !important; */
+    background: #3d3c60 !important;
 }
 
 .labelLine {
@@ -181,7 +193,7 @@ h2{
     padding: 0 8px;
     margin-left: 10px;
     transition: 0.2s ease;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    background: transparent;
     pointer-events: none;
     top: 50%;
     transform: translateY(-50%);
@@ -189,9 +201,12 @@ h2{
 }
 
 .labelActive {
-    color: #8a6fe8;
+    color: #ffffff;
     font-size: 0.9em;
     top: 0;
     transform: translateY(10%);
     font-weight: bold;
+    /* background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); */
+    background: #3d3c60;
+    background-attachment: fixed
 }

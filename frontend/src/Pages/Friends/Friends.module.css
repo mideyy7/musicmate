@@ -1,3 +1,10 @@
+.card_wrapper{
+  display: flex;
+  align-items: center;    
+  justify-content: center;
+  gap: 20px;  
+}
+
 .main_con {
   width: 320px;
   background-color: #3d3c60;
@@ -5,7 +12,7 @@
   overflow: hidden;
   margin: auto;
   padding-bottom: 18px;
-  /* margin-top: 100px; */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
 }
 
 .profile_con {
@@ -66,7 +73,7 @@
   white-space: normal;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;    /* change 3 to the number of lines you want */
+  -webkit-line-clamp: 3;    
   line-clamp: 3;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -88,3 +95,25 @@
   font-size: 14px;
 }
 
+.match_btn{
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: pointer;
+  font-size: 30px;   
+  line-height: 1;
+}
+#reject{
+  background-color: #ff4d503a;
+  border: 2px solid #ff4d4f;
+  color: #ff4d4f;
+}
+
+
+#accept{
+  background-color: #53c41a3a;
+  border: 2px solid #52c41a;
+  color: #52c41a;
+
+}
