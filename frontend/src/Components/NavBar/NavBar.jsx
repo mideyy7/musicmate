@@ -7,17 +7,19 @@ const NavBar = () => {
         <>
             <Nav>
                 <span className={styles.nav_left}>
+                                    <NavLink to="/index" id={styles.title}>
                                     <img src={logo} alt="MusicMate_Logo" />
                                     <h1>MusicMate</h1>
+                                    </NavLink>
                                 </span>
                 <NavMenu>
                     <NavLink to="/index" className={({ isActive }) => (isActive ? "active" : "")}>
                         <h1>Home</h1>
                     </NavLink>
-                    <NavLink to="/Match" className={({ isActive }) => (isActive ? "active" : "")}>
+                    <NavLink to="/MatchPage" className={({ isActive }) => (isActive ? "active" : "")}>
                         <h1>Match</h1>
                     </NavLink>
-                    <NavLink to="/FriendsPage" className={({ isActive }) => (isActive ? "active" : "")}>
+                    <NavLink to="/Friends" className={({ isActive }) => (isActive ? "active" : "")}>
                         <h1>Friends</h1>
                     </NavLink>
                     <NavLink to="/Post" className={({ isActive }) => (isActive ? "active" : "")}>

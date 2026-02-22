@@ -24,8 +24,12 @@ export const NavLink = styled(Link)`
     &.active {
         color: #8A2BE2;
     }
+    &:hover {
+        color: #8A2BE2;
+        transform: scale(1.05);
+    }
     font-size: 0.6em;
-
+    transition: 0.4s;
 `;
 
 export const Bars = styled(FaBars)`

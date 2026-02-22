@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "username": "Alice",
+    "subtitle": "Designer",
+    "description": "Loves creating beautiful interfaces.",
+    "tags": ["UI", "Figma", "Art"]
+  },
+  {
+    "id": 2,
+    "username": "Greece",
+    "subtitle": "Designer",
+    "description": "Loves creating beautiful interfaces.",
+    "tags": ["UI", "Figma", "Art"]
+  },
+  {
+    "id": 3,
+    "username": "Bold",
+    "subtitle": "Designer",
+    "description": "Loves creating beautiful interfaces.",
+    "tags": ["UI", "Figma", "Art"]
+  },
+  {
+    "id": 4,
+    "username": "Stwewe",
+    "subtitle": "Designer",
+    "description": "Loves creating beautiful interfaces.",
+    "tags": ["UI", "Figma", "Art"]
+  }
+]
