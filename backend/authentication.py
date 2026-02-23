@@ -113,6 +113,10 @@ def create_account_page(request: Request, error: str = "", username: str = "", d
     cas_user = request.session.get("user")
     if not cas_user:
         return RedirectResponse("/")
+    
+    first_name = cas_user['fullname'].split()[0]
+    if not display_name:
+        display_name = first_name
 
     return HTMLResponse(f"""
     <h1>Create your account</h1>
