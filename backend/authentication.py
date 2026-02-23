@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import RedirectResponse, HTMLResponse
 from starlette.middleware.sessions import SessionMiddleware
+from better_profanity import profanity
 import secrets
 import requests
 
@@ -140,7 +141,12 @@ def create_account(
 
     if username in USERS:
         return create_account_page(request, error="Username already taken.", username=username, display_name=display_name)
+    elif profanity.contains_profanity(username):
+        return create_account_page(request, error="Username contains profanity.", username=username, display_name=display_name)
     
+    if profanity.contains_profanity(display_name):
+        return create_account_page(request, error="Display name contains profanity.", username=username, display_name=display_name)
+
     # Validate password
     error = validate_password(password)
     if error:
