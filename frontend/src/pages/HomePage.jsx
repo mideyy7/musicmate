@@ -48,7 +48,7 @@ export default function HomePage() {
     });
     if (user.spotify_email) setSpotifyEmail(user.spotify_email);
     loadSpotifyData();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function loadSpotifyData() {
     try {

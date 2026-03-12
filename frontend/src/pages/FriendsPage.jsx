@@ -38,7 +38,7 @@ export default function FriendsPage() {
       pollRef.current = setInterval(() => loadMessages(selectedMatchId), 3000);
     }
     return () => clearInterval(pollRef.current);
-  }, [selectedMatchId]);
+  }, [selectedMatchId, navigate]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
