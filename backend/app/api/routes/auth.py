@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
+import os
+import shutil
 
 from app.api.deps import get_current_user, get_db
 from app.crud.user import create_user, get_user_by_email, update_user
@@ -112,3 +114,22 @@ def update_me(
         )
     updated_user = update_user(db, current_user, update_data)
     return updated_user
+
+
+@router.post("/me/picture", response_model=UserResponse)
+async def upload_picture(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Upload a profile picture."""
+    upload_dir = "uploads"
+    os.makedirs(upload_dir, exist_ok=True)
+    ext = os.path.splitext(file.filename)[1] if file.filename else ".jpg"
+    filename = f"user_{current_user.id}{ext}"
+    path = os.path.join(upload_dir, filename)
+    with open(path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    url = f"/uploads/{filename}"
+    updated = update_user(db, current_user, {"profile_picture": url})
+    return updated

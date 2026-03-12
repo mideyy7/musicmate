@@ -8,14 +8,15 @@
   --primary: #6C5CE7;
   --primary-dark: #5A4BD1;
   --accent: #1DB954;
-  --bg: #0F0F1A;
+  --bg: #0E0E1A;
+  --bg-nav: #131320;
   --bg-card: #1A1A2E;
-  --bg-input: #16213E;
+  --bg-input: #151528;
   --text: #EAEAEA;
-  --text-muted: #8892B0;
+  --text-muted: #7A85A0;
   --error: #FF6B6B;
   --success: #00C853;
-  --border: #2A2A4A;
+  --border: #252540;
 
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.6;

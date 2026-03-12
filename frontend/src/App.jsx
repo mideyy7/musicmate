@@ -4,13 +4,12 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import SSOPage from './pages/SSOPage';
 import OnboardingPage from './pages/OnboardingPage';
-import DashboardPage from './pages/DashboardPage';
 import SpotifyCallbackPage from './pages/SpotifyCallbackPage';
-import SwipePage from './pages/SwipePage';
-import MatchesPage from './pages/MatchesPage';
-import ChatPage from './pages/ChatPage';
-import PlaylistsPage from './pages/PlaylistsPage';
-import PlaylistDetailPage from './pages/PlaylistDetailPage';
+import HomePage from './pages/HomePage';
+import MatchPage from './pages/MatchPage';
+import FriendsPage from './pages/FriendsPage';
+import PostsPage from './pages/PostsPage';
+import FeedPage from './pages/FeedPage';
 import './App.css';
 
 function App() {
@@ -22,50 +21,50 @@ function App() {
           <Route path="/sso" element={<SSOPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route
-            path="/dashboard"
+            path="/"
             element={
               <ProtectedRoute>
-                <DashboardPage />
+                <HomePage />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/discover"
+            path="/match"
             element={
               <ProtectedRoute>
-                <SwipePage />
+                <MatchPage />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/matches"
+            path="/friends"
             element={
               <ProtectedRoute>
-                <MatchesPage />
+                <FriendsPage />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/playlists"
+            path="/friends/:matchId"
             element={
               <ProtectedRoute>
-                <PlaylistsPage />
+                <FriendsPage />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/playlists/:playlistId"
+            path="/posts"
             element={
               <ProtectedRoute>
-                <PlaylistDetailPage />
+                <PostsPage />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/chat/:matchId"
+            path="/feed"
             element={
               <ProtectedRoute>
-                <ChatPage />
+                <FeedPage />
               </ProtectedRoute>
             }
           />

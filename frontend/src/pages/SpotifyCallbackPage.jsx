@@ -28,7 +28,7 @@ export default function SpotifyCallbackPage() {
         setStatus('Syncing your music data...');
         await syncSpotifyProfile();
         setStatus('Done! Redirecting...');
-        navigate('/dashboard', { replace: true });
+        navigate('/', { replace: true });
       } catch (err) {
         setError(err.message);
       }
@@ -46,7 +46,7 @@ export default function SpotifyCallbackPage() {
             <button
               className="btn-primary"
               style={{ marginTop: '1rem' }}
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/')}
             >
               Back to Dashboard
             </button>

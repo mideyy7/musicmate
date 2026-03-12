@@ -183,3 +183,46 @@ export function getWeeklyRecap(playlistId) {
 export function autoCreatePlaylist(matchId) {
   return request(`/playlist/auto-create/${matchId}`, { method: 'POST' });
 }
+
+// Profile picture upload
+export async function uploadProfilePicture(file) {
+  const token = localStorage.getItem('token');
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await fetch('/api/auth/me/picture', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || 'Upload failed');
+  return data;
+}
+
+// Posts (Daily Tunes - Phase 6)
+export function getPosts() {
+  return request('/posts');
+}
+
+export function postTune({ song_name, artist }) {
+  return request('/posts', {
+    method: 'POST',
+    body: JSON.stringify({ song_name, artist }),
+  });
+}
+
+export function reactToTune(tuneId, reaction_type) {
+  return request(`/posts/${tuneId}/react`, {
+    method: 'POST',
+    body: JSON.stringify({ reaction_type }),
+  });
+}
+
+export function deletePost(tuneId) {
+  return request(`/posts/${tuneId}`, { method: 'DELETE' });
+}
+
+// Feed (Campus Pulse - Phase 6)
+export function getCampusPulse() {
+  return request('/feed');
+}

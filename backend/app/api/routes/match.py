@@ -72,6 +72,10 @@ def match_feed(
             course=user.course if user.show_course else None,
             year=user.year if user.show_year else None,
             faculty=user.faculty if user.show_faculty else None,
+            age=user.age,
+            bio=user.bio,
+            hobbies=user.hobbies,
+            profile_picture=user.profile_picture,
             compatibility_score=compat["score"],
             breakdown=CompatibilityBreakdown(
                 shared_artists=compat["shared_artists"],
@@ -182,6 +186,7 @@ def list_matches(
                 "course": other_user.course if other_user.show_course else None,
                 "year": other_user.year if other_user.show_year else None,
                 "faculty": other_user.faculty if other_user.show_faculty else None,
+                "profile_picture": other_user.profile_picture,
             },
             compatibility_score=match.compatibility_score,
             breakdown=CompatibilityBreakdown(

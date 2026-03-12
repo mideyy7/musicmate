@@ -38,6 +38,10 @@ class CandidateResponse(BaseModel):
     course: str | None = None
     year: int | None = None
     faculty: str | None = None
+    age: int | None = None
+    bio: str | None = None
+    hobbies: str | None = None
+    profile_picture: str | None = None
     compatibility_score: float
     breakdown: CompatibilityBreakdown
     top_artists: list[str]

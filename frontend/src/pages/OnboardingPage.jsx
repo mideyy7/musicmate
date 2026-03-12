@@ -70,7 +70,7 @@ export default function OnboardingPage() {
       localStorage.setItem('token', access_token);
       const user = await getMe();
       loginWithToken(access_token, user);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
       setError(err.message);
     } finally {

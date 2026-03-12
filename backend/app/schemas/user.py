@@ -42,6 +42,12 @@ class ProfileUpdate(BaseModel):
     show_year: bool | None = None
     show_faculty: bool | None = None
     spotify_email: str | None = None
+    nickname: str | None = None
+    bio: str | None = None
+    age: int | None = None
+    hobbies: str | None = None
+    fun_fact: str | None = None
+    profile_picture: str | None = None
 
 
 class UserResponse(BaseModel):
@@ -58,6 +64,14 @@ class UserResponse(BaseModel):
     spotify_email: str | None
     is_verified: bool
     created_at: datetime
+    nickname: str | None = None
+    bio: str | None = None
+    age: int | None = None
+    hobbies: str | None = None
+    fun_fact: str | None = None
+    profile_picture: str | None = None
+    daily_tune_streak: int = 0
+    last_tune_date: str | None = None
 
     class Config:
         from_attributes = True

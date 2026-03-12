@@ -5,24 +5,37 @@ export default function NavBar() {
   const navigate = useNavigate();
 
   const tabs = [
-    { path: '/dashboard', label: 'Profile', icon: '♪' },
-    { path: '/discover', label: 'Discover', icon: '♡' },
-    { path: '/matches', label: 'Matches', icon: '★' },
-    { path: '/playlists', label: 'Playlists', icon: '♫' },
+    { path: '/', label: 'Home' },
+    { path: '/match', label: 'Match' },
+    { path: '/friends', label: 'Friends' },
+    { path: '/posts', label: 'Posts' },
+    { path: '/feed', label: 'Feed' },
   ];
 
+  function isActive(path) {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  }
+
   return (
-    <nav className="navbar">
-      {tabs.map((tab) => (
-        <button
-          key={tab.path}
-          className={`nav-tab ${location.pathname === tab.path ? 'active' : ''}`}
-          onClick={() => navigate(tab.path)}
-        >
-          <span className="nav-icon">{tab.icon}</span>
-          <span className="nav-label">{tab.label}</span>
-        </button>
-      ))}
+    <nav className="top-navbar">
+      <div className="navbar-brand" onClick={() => navigate('/')}>
+        <div className="navbar-logo">
+          <span>♪</span>
+        </div>
+        <span className="navbar-title">MusicMate</span>
+      </div>
+      <div className="navbar-tabs">
+        {tabs.map((tab) => (
+          <button
+            key={tab.path}
+            className={`nav-tab ${isActive(tab.path) ? 'active' : ''}`}
+            onClick={() => navigate(tab.path)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
     </nav>
   );
 }
