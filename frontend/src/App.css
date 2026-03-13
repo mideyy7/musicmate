@@ -328,21 +328,29 @@
 }
 
 .navbar-logo {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: var(--primary);
+  background: #0B0914;
+  border: 3px solid var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  color: white;
+  color: var(--primary);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-logo svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--primary);
 }
 
 .navbar-title {
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 1.35rem;
+  font-weight: 800;
   color: var(--text);
+  letter-spacing: -0.5px;
 }
 
 .navbar-tabs {

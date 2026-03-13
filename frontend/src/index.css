@@ -5,10 +5,10 @@
 }
 
 :root {
-  --primary: #6B55E4;
-  --primary-dark: #5844C8;
-  --accent: #E35E5E;
-  --accent-alt: #46A36E;
+  --primary: #927AFA;
+  --primary-dark: #7B62F0;
+  --accent: #FF5E5E;
+  --accent-alt: #4CD964;
   --bg: #1e1e36;
   --bg-nav: #14142B;
   --bg-card: #2B2A4A;
@@ -19,8 +19,9 @@
   --success: #46A36E;
   --border: #3A3959;
 
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  line-height: 1.6;
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-size: 15px;
   color: var(--text);
   background-color: var(--bg);
   font-synthesis: none;
