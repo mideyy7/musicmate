@@ -120,120 +120,122 @@ export default function FriendsPage() {
     <div className="page-container" style={{ overflow: 'hidden' }}>
       <NavBar />
       <div className="friends-page">
-        {/* Sidebar */}
-        <div className="friends-sidebar">
-          <div className="friends-sidebar-header">Friends</div>
-          <div className="friends-list">
-            {matches.length === 0 ? (
-              <div style={{ padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                No matches yet. Start swiping!
+        <div className="friends-container-card">
+          {/* Sidebar */}
+          <div className="friends-sidebar">
+            <div className="friends-sidebar-header">Friends</div>
+            <div className="friends-list">
+              {matches.length === 0 ? (
+                <div style={{ padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  No matches yet. Start swiping!
+                </div>
+              ) : (
+                matches.map(match => (
+                  <div
+                    key={match.id}
+                    className={`friend-item ${selectedMatchId === match.id ? 'active' : ''}`}
+                    onClick={() => selectMatch(match.id)}
+                  >
+                    <div className="friend-avatar">{getAvatar(match.other_user)}</div>
+                    <div className="friend-info">
+                      <div className="friend-name">{match.other_user.display_name}</div>
+                      <div className="friend-last-msg">{getLastMessage(match)}</div>
+                    </div>
+                    {unreadByMatch[match.id] > 0 && (
+                      <div className="friend-unread">{unreadByMatch[match.id]}</div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Chat Area */}
+          <div className="friends-chat-area">
+            {!selectedMatch ? (
+              <div className="friends-chat-empty">
+                <div className="friends-chat-empty-icon">💬</div>
+                <span>Select a friend to start chatting</span>
               </div>
             ) : (
-              matches.map(match => (
-                <div
-                  key={match.id}
-                  className={`friend-item ${selectedMatchId === match.id ? 'active' : ''}`}
-                  onClick={() => selectMatch(match.id)}
-                >
-                  <div className="friend-avatar">{getAvatar(match.other_user)}</div>
-                  <div className="friend-info">
-                    <div className="friend-name">{match.other_user.display_name}</div>
-                    <div className="friend-last-msg">{getLastMessage(match)}</div>
+              <>
+                {/* Chat Header */}
+                <div className="friends-chat-header">
+                  <div className="friend-avatar" style={{ width: 36, height: 36, fontSize: '0.9rem' }}>
+                    {getAvatar(selectedMatch.other_user)}
                   </div>
-                  {unreadByMatch[match.id] > 0 && (
-                    <div className="friend-unread">{unreadByMatch[match.id]}</div>
+                  <h3>{selectedMatch.other_user.display_name}</h3>
+                  <span className="friends-chat-score">{Math.round(selectedMatch.compatibility_score)}% compatible</span>
+                </div>
+
+                {/* Messages */}
+                <div className="friends-messages">
+                  {loadingMessages ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                      <div className="spotify-loading-icon" style={{ margin: 0 }}></div>
+                    </div>
+                  ) : (
+                    <>
+                      {messages.length === 0 && prompts.length > 0 && (
+                        <div className="chat-prompts">
+                          <p className="chat-prompts-title">Start the conversation:</p>
+                          {prompts.slice(0, 4).map((prompt, i) => (
+                            <button key={i} className="chat-prompt-btn" onClick={() => setInput(prompt)}>
+                              {prompt}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {messages.map(msg => {
+                        const isMine = msg.sender_id === user.id;
+                        return (
+                          <div key={msg.id} className={`chat-bubble ${isMine ? 'sent' : 'received'}`}>
+                            {msg.message_type === 'song_share' && msg.song_data ? (
+                              <div className="song-share-card">
+                                <div className="song-share-art">
+                                  {msg.song_data.image_url
+                                    ? <img src={msg.song_data.image_url} alt={msg.song_data.track_name} />
+                                    : <div className="song-art-placeholder">♪</div>}
+                                </div>
+                                <div className="song-share-info">
+                                  <span className="song-share-name">{msg.song_data.track_name}</span>
+                                  <span className="song-share-artist">{msg.song_data.artist}</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <p>{msg.content}</p>
+                            )}
+                            <span className="chat-time">
+                              {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        );
+                      })}
+                      <div ref={messagesEndRef} />
+                    </>
                   )}
                 </div>
-              ))
+
+                {/* Input Bar */}
+                <form className="friends-input-bar" onSubmit={handleSend}>
+                  <button type="button" className="chat-song-btn" onClick={() => setShowSongSearch(true)} title="Share a song">
+                    ♪
+                  </button>
+                  <input
+                    type="text"
+                    className="friends-input"
+                    placeholder="Type a message..."
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    disabled={sending}
+                  />
+                  <button type="submit" className="chat-send-btn" disabled={!input.trim() || sending}>
+                    →
+                  </button>
+                </form>
+              </>
             )}
           </div>
-        </div>
-
-        {/* Chat Area */}
-        <div className="friends-chat-area">
-          {!selectedMatch ? (
-            <div className="friends-chat-empty">
-              <div className="friends-chat-empty-icon">💬</div>
-              <span>Select a friend to start chatting</span>
-            </div>
-          ) : (
-            <>
-              {/* Chat Header */}
-              <div className="friends-chat-header">
-                <div className="friend-avatar" style={{ width: 36, height: 36, fontSize: '0.9rem' }}>
-                  {getAvatar(selectedMatch.other_user)}
-                </div>
-                <h3>{selectedMatch.other_user.display_name}</h3>
-                <span className="friends-chat-score">{Math.round(selectedMatch.compatibility_score)}% compatible</span>
-              </div>
-
-              {/* Messages */}
-              <div className="friends-messages">
-                {loadingMessages ? (
-                  <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-                    <div className="spotify-loading-icon" style={{ margin: 0 }}></div>
-                  </div>
-                ) : (
-                  <>
-                    {messages.length === 0 && prompts.length > 0 && (
-                      <div className="chat-prompts">
-                        <p className="chat-prompts-title">Start the conversation:</p>
-                        {prompts.slice(0, 4).map((prompt, i) => (
-                          <button key={i} className="chat-prompt-btn" onClick={() => setInput(prompt)}>
-                            {prompt}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {messages.map(msg => {
-                      const isMine = msg.sender_id === user.id;
-                      return (
-                        <div key={msg.id} className={`chat-bubble ${isMine ? 'sent' : 'received'}`}>
-                          {msg.message_type === 'song_share' && msg.song_data ? (
-                            <div className="song-share-card">
-                              <div className="song-share-art">
-                                {msg.song_data.image_url
-                                  ? <img src={msg.song_data.image_url} alt={msg.song_data.track_name} />
-                                  : <div className="song-art-placeholder">♪</div>}
-                              </div>
-                              <div className="song-share-info">
-                                <span className="song-share-name">{msg.song_data.track_name}</span>
-                                <span className="song-share-artist">{msg.song_data.artist}</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <p>{msg.content}</p>
-                          )}
-                          <span className="chat-time">
-                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-                      );
-                    })}
-                    <div ref={messagesEndRef} />
-                  </>
-                )}
-              </div>
-
-              {/* Input Bar */}
-              <form className="friends-input-bar" onSubmit={handleSend}>
-                <button type="button" className="chat-song-btn" onClick={() => setShowSongSearch(true)} title="Share a song">
-                  ♪
-                </button>
-                <input
-                  type="text"
-                  className="friends-input"
-                  placeholder="Type a message..."
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  disabled={sending}
-                />
-                <button type="submit" className="chat-send-btn" disabled={!input.trim() || sending}>
-                  →
-                </button>
-              </form>
-            </>
-          )}
         </div>
       </div>
 

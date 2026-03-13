@@ -5,18 +5,19 @@
 }
 
 :root {
-  --primary: #6C5CE7;
-  --primary-dark: #5A4BD1;
-  --accent: #1DB954;
-  --bg: #0E0E1A;
-  --bg-nav: #131320;
-  --bg-card: #1A1A2E;
-  --bg-input: #151528;
-  --text: #EAEAEA;
-  --text-muted: #7A85A0;
-  --error: #FF6B6B;
-  --success: #00C853;
-  --border: #252540;
+  --primary: #6B55E4;
+  --primary-dark: #5844C8;
+  --accent: #E35E5E;
+  --accent-alt: #46A36E;
+  --bg: #1e1e36;
+  --bg-nav: #14142B;
+  --bg-card: #2B2A4A;
+  --bg-input: #1F1E38;
+  --text: #F3F3F3;
+  --text-muted: #A3A3B8;
+  --error: #E35E5E;
+  --success: #46A36E;
+  --border: #3A3959;
 
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.6;
