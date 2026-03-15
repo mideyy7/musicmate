@@ -1,0 +1,79 @@
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { casComplete, getMe } from '../services/api';
+
+export default function CasCallbackPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { loginWithToken } = useAuth();
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const username = searchParams.get('username');
+    const fullname = searchParams.get('fullname');
+    const csticket = localStorage.getItem('cas_csticket');
+
+    if (!username || !fullname) {
+      setError('Authentication failed — no credentials received from the university.');
+      return;
+    }
+
+    if (!csticket) {
+      setError('Session expired. Please try signing in again.');
+      return;
+    }
+
+    async function complete() {
+      try {
+        localStorage.removeItem('cas_csticket');
+        const { access_token, is_new_user } = await casComplete(username, fullname, csticket);
+        localStorage.setItem('token', access_token);
+        const user = await getMe();
+        loginWithToken(access_token, user);
+
+        if (is_new_user) {
+          // New student — send to onboarding to fill in display name, course, etc.
+          navigate('/onboarding', {
+            replace: true,
+            state: { casData: { display_name: fullname, username } },
+          });
+        } else {
+          navigate('/', { replace: true });
+        }
+      } catch (err) {
+        setError(err.message);
+      }
+    }
+
+    complete();
+  }, [searchParams, navigate, loginWithToken]);
+
+  if (error) {
+    return (
+      <div className="auth-container">
+        <div className="auth-card" style={{ textAlign: 'center' }}>
+          <div className="error-message">{error}</div>
+          <button
+            className="btn-primary"
+            style={{ marginTop: '1rem' }}
+            onClick={() => navigate('/sso')}
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="auth-container">
+      <div className="auth-card" style={{ textAlign: 'center' }}>
+        <h2>Verifying with University of Manchester...</h2>
+        <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+          Please wait while we confirm your student status.
+        </p>
+      </div>
+    </div>
+  );
+}
