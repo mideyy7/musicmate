@@ -1,17 +1,22 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ssoComplete, getMe } from '../services/api';
+import { ssoComplete, updateProfile, getMe } from '../services/api';
 
 export default function OnboardingPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { loginWithToken } = useAuth();
 
+  // ssoData: from the old email-based SSO flow (needs account creation + password)
+  // casData: from CAS flow (account already created, just needs profile info)
   const ssoData = location.state?.ssoData;
+  const casData = location.state?.casData;
+
+  const isCAS = Boolean(casData);
 
   const [formData, setFormData] = useState({
-    display_name: '',
+    display_name: casData?.display_name || '',
     password: '',
     confirmPassword: '',
     student_id: ssoData?.student_id || '',
@@ -25,7 +30,7 @@ export default function OnboardingPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  if (!ssoData) {
+  if (!ssoData && !casData) {
     return <Navigate to="/sso" replace />;
   }
 
@@ -41,35 +46,54 @@ export default function OnboardingPage() {
     e.preventDefault();
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
+    if (!isCAS) {
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
+      if (formData.password.length < 6) {
+        setError('Password must be at least 6 characters');
+        return;
+      }
     }
 
     setIsLoading(true);
 
     try {
-      const { access_token } = await ssoComplete({
-        email: ssoData.email,
-        password: formData.password,
-        display_name: formData.display_name,
-        student_id: formData.student_id || null,
-        course: formData.course || null,
-        year: formData.year ? parseInt(formData.year) : null,
-        faculty: formData.faculty || null,
-        show_course: formData.show_course,
-        show_year: formData.show_year,
-        show_faculty: formData.show_faculty,
-      });
+      if (isCAS) {
+        // CAS users are already authenticated — just update their profile
+        await updateProfile({
+          display_name: formData.display_name || casData.display_name,
+          student_id: formData.student_id || null,
+          course: formData.course || null,
+          year: formData.year ? parseInt(formData.year) : null,
+          faculty: formData.faculty || null,
+          show_course: formData.show_course,
+          show_year: formData.show_year,
+          show_faculty: formData.show_faculty,
+        });
+        const user = await getMe();
+        const token = localStorage.getItem('token');
+        loginWithToken(token, user);
+      } else {
+        // Email-based SSO — create the account
+        const { access_token } = await ssoComplete({
+          email: ssoData.email,
+          password: formData.password,
+          display_name: formData.display_name,
+          student_id: formData.student_id || null,
+          course: formData.course || null,
+          year: formData.year ? parseInt(formData.year) : null,
+          faculty: formData.faculty || null,
+          show_course: formData.show_course,
+          show_year: formData.show_year,
+          show_faculty: formData.show_faculty,
+        });
+        localStorage.setItem('token', access_token);
+        const user = await getMe();
+        loginWithToken(access_token, user);
+      }
 
-      localStorage.setItem('token', access_token);
-      const user = await getMe();
-      loginWithToken(access_token, user);
       navigate('/');
     } catch (err) {
       setError(err.message);
@@ -83,9 +107,15 @@ export default function OnboardingPage() {
       <div className="auth-card onboarding-card">
         <div className="auth-header">
           <h1>Welcome to MusicMate</h1>
-          <p>
-            Verified: <strong>{ssoData.email}</strong>
-          </p>
+          {isCAS ? (
+            <p>
+              Verified UoM student: <strong>{casData.display_name}</strong>
+            </p>
+          ) : (
+            <p>
+              Verified: <strong>{ssoData.email}</strong>
+            </p>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
@@ -104,33 +134,37 @@ export default function OnboardingPage() {
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Create Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="At least 6 characters"
-              required
-            />
-          </div>
+          {!isCAS && (
+            <>
+              <div className="form-group">
+                <label htmlFor="password">Create Password</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="At least 6 characters"
+                  required
+                />
+              </div>
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm your password"
-              required
-            />
-          </div>
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Confirm Password</label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm your password"
+                  required
+                />
+              </div>
+            </>
+          )}
 
-          <h3>Academic Info (detected from SSO)</h3>
+          <h3>Academic Info</h3>
 
           <div className="form-group">
             <label htmlFor="student_id">Student ID</label>
@@ -218,7 +252,7 @@ export default function OnboardingPage() {
           </div>
 
           <button type="submit" className="btn-primary" disabled={isLoading}>
-            {isLoading ? 'Creating account...' : 'Complete Signup'}
+            {isLoading ? 'Saving...' : 'Complete Setup'}
           </button>
         </form>
       </div>

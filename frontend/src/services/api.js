@@ -25,6 +25,18 @@ async function request(endpoint, options = {}) {
   return data;
 }
 
+// UoM CAS authentication
+export function casInitiate(callbackUrl) {
+  return request(`/auth/cas/initiate?callback_url=${encodeURIComponent(callbackUrl)}`);
+}
+
+export function casComplete(username, fullname, csticket) {
+  return request('/auth/cas/complete', {
+    method: 'POST',
+    body: JSON.stringify({ username, fullname, csticket }),
+  });
+}
+
 export function ssoInitiate(email) {
   return request('/auth/sso/initiate', {
     method: 'POST',

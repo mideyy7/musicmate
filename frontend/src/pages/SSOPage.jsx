@@ -1,24 +1,24 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { ssoInitiate } from '../services/api';
+import { Link } from 'react-router-dom';
+import { casInitiate } from '../services/api';
 
 export default function SSOPage() {
-  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
-  async function handleSSO(e) {
-    e.preventDefault();
+  async function handleCASLogin() {
     setError('');
     setIsLoading(true);
 
     try {
-      const ssoData = await ssoInitiate(email);
-      navigate('/onboarding', { state: { ssoData } });
+      const callbackUrl = `${window.location.origin}/cas/callback`;
+      const { cas_url, csticket } = await casInitiate(callbackUrl);
+      // Store the ticket so CasCallbackPage can retrieve it after CAS redirects back
+      localStorage.setItem('cas_csticket', csticket);
+      // Redirect the browser to the UoM CAS login page
+      window.location.href = cas_url;
     } catch (err) {
       setError(err.message);
-    } finally {
       setIsLoading(false);
     }
   }
@@ -27,29 +27,23 @@ export default function SSOPage() {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <h1>University SSO</h1>
-          <p>Enter your University of Manchester email to verify your student status</p>
+          <h1>Sign in with University</h1>
+          <p>
+            Click below to authenticate with your University of Manchester
+            account. Only UoM students can access MusicMate.
+          </p>
         </div>
 
-        <form onSubmit={handleSSO} className="auth-form">
-          {error && <div className="error-message">{error}</div>}
+        {error && <div className="error-message">{error}</div>}
 
-          <div className="form-group">
-            <label htmlFor="sso-email">University Email</label>
-            <input
-              id="sso-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your.name@manchester.ac.uk"
-              required
-            />
-          </div>
-
-          <button type="submit" className="btn-primary" disabled={isLoading}>
-            {isLoading ? 'Verifying...' : 'Verify with SSO'}
-          </button>
-        </form>
+        <button
+          className="btn-primary"
+          onClick={handleCASLogin}
+          disabled={isLoading}
+          style={{ width: '100%', marginTop: '1rem' }}
+        >
+          {isLoading ? 'Redirecting...' : 'Sign in with UoM'}
+        </button>
 
         <Link to="/login" className="back-link">
           Back to login

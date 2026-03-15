@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { updateProfile, getSpotifyAuthUrl, getSpotifyStatus, getMusicProfile, uploadProfilePicture } from '../services/api';
+import { updateProfile, getSpotifyAuthUrl, getSpotifyStatus, getMusicProfile, syncSpotifyProfile, spotifyCallback, uploadProfilePicture } from '../services/api';
 import MusicProfile from '../components/MusicProfile';
 import NavBar from '../components/NavBar';
 
@@ -58,7 +58,13 @@ export default function HomePage() {
         try {
           const profile = await getMusicProfile();
           setMusicProfile(profile);
-        } catch { /* not synced yet */ }
+        } catch {
+          // Profile not synced yet — trigger a sync now
+          try {
+            const profile = await syncSpotifyProfile();
+            setMusicProfile(profile);
+          } catch { /* still failed, show reconnect message */ }
+        }
       }
     } catch { /* not connected */ }
     finally { setSpotifyLoading(false); }
@@ -132,7 +138,15 @@ export default function HomePage() {
       const updated = await updateProfile({ spotify_email: spotifyEmail.trim() });
       updateUser(updated);
       const { auth_url } = await getSpotifyAuthUrl();
-      window.location.href = auth_url;
+      if (auth_url.startsWith('mock://')) {
+        // Mock mode: skip OAuth, connect and sync directly
+        await spotifyCallback('mock_code');
+        const profile = await syncSpotifyProfile();
+        setMusicProfile(profile);
+        setSpotifyConnected(true);
+      } else {
+        window.location.href = auth_url;
+      }
     } catch (err) {
       setSpotifyEmailError(err.message);
     }

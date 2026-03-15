@@ -4,9 +4,12 @@ import os
 import shutil
 
 from app.api.deps import get_current_user, get_db
-from app.crud.user import create_user, get_user_by_email, update_user
+from app.crud.user import create_cas_user, create_user, get_user_by_email, update_user
 from app.models.user import User
 from app.schemas.user import (
+    CASCompleteRequest,
+    CASInitiateResponse,
+    CASTokenResponse,
     LoginRequest,
     ProfileUpdate,
     SSOCallbackData,
@@ -21,8 +24,55 @@ from app.services.auth import (
     validate_email_domain,
     verify_password,
 )
+from app.services.cas import generate_cas_url, verify_and_consume
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+
+@router.get("/cas/initiate", response_model=CASInitiateResponse)
+def cas_initiate(callback_url: str = "http://localhost:5173/cas/callback"):
+    """
+    Start the UoM CAS login flow.
+    Returns a CAS redirect URL and a one-time csticket.
+    The frontend should store the csticket, then redirect the user to cas_url.
+    CAS will redirect back to callback_url with ?username=&fullname= query params.
+    """
+    cas_url, csticket = generate_cas_url(callback_url)
+    return CASInitiateResponse(cas_url=cas_url, csticket=csticket)
+
+
+@router.post("/cas/complete", response_model=CASTokenResponse)
+def cas_complete(request: CASCompleteRequest, db: Session = Depends(get_db)):
+    """
+    Complete the UoM CAS login flow.
+    Verifies the csticket with the UoM CAS server, then creates or logs in the user.
+    Returns a JWT and whether this is a new account (needs onboarding).
+    """
+    verified = verify_and_consume(request.csticket, request.username, request.fullname)
+    if not verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="CAS verification failed. Please try signing in again.",
+        )
+
+    # Try student domain first, then fall back to staff domain for existing accounts
+    email = f"{request.username}@student.manchester.ac.uk"
+    existing_user = get_user_by_email(db, email)
+
+    # Also check the old staff/legacy domain in case they have an existing account
+    if not existing_user:
+        legacy_email = f"{request.username}@manchester.ac.uk"
+        existing_user = get_user_by_email(db, legacy_email)
+        if existing_user:
+            email = legacy_email
+
+    if existing_user:
+        access_token = create_access_token(data={"sub": str(existing_user.id)})
+        return CASTokenResponse(access_token=access_token, is_new_user=False)
+
+    user = create_cas_user(db, email=email, display_name=request.fullname)
+    access_token = create_access_token(data={"sub": str(user.id)})
+    return CASTokenResponse(access_token=access_token, is_new_user=True)
 
 
 @router.post("/sso/initiate", response_model=SSOCallbackData)

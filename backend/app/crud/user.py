@@ -1,3 +1,5 @@
+import secrets
+
 from sqlalchemy.orm import Session
 
 from app.models.user import User
@@ -36,6 +38,22 @@ def create_user(
         show_course=show_course,
         show_year=show_year,
         show_faculty=show_faculty,
+        is_verified=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def create_cas_user(db: Session, email: str, display_name: str) -> User:
+    """Create a user authenticated via UoM CAS. A random password is assigned
+    since the user will always log in through CAS, not password."""
+    random_password = secrets.token_hex(32)
+    user = User(
+        email=email,
+        hashed_password=hash_password(random_password),
+        display_name=display_name,
         is_verified=True,
     )
     db.add(user)

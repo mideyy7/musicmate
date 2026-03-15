@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import SSOPage from './pages/SSOPage';
 import OnboardingPage from './pages/OnboardingPage';
 import SpotifyCallbackPage from './pages/SpotifyCallbackPage';
+import CasCallbackPage from './pages/CasCallbackPage';
 import HomePage from './pages/HomePage';
 import MatchPage from './pages/MatchPage';
 import FriendsPage from './pages/FriendsPage';
@@ -19,6 +20,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/sso" element={<SSOPage />} />
+          <Route path="/cas/callback" element={<CasCallbackPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route
             path="/"

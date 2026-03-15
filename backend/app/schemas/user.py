@@ -35,6 +35,7 @@ class LoginRequest(BaseModel):
 
 class ProfileUpdate(BaseModel):
     display_name: str | None = None
+    student_id: str | None = None
     course: str | None = None
     year: int | None = None
     faculty: str | None = None
@@ -80,3 +81,22 @@ class UserResponse(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+# --- UoM CAS schemas ---
+
+class CASInitiateResponse(BaseModel):
+    cas_url: str
+    csticket: str
+
+
+class CASCompleteRequest(BaseModel):
+    username: str
+    fullname: str
+    csticket: str
+
+
+class CASTokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    is_new_user: bool
