@@ -30,6 +30,8 @@ from app.services.spotify import (
     get_spotify_user_id,
     is_mock_mode,
     refresh_access_token,
+    save_track_to_library,
+    search_tracks,
 )
 
 router = APIRouter(prefix="/api/spotify", tags=["spotify"])

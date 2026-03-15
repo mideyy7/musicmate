@@ -14,6 +14,9 @@ router = APIRouter(prefix="/api/posts", tags=["posts"])
 class PostTuneRequest(BaseModel):
     song_name: str
     artist: str
+    spotify_id: str | None = None
+    spotify_url: str | None = None
+    cover_image: str | None = None
 
 class ReactRequest(BaseModel):
     reaction_type: str  # "like" or "dislike"
@@ -40,6 +43,9 @@ def get_post_response(tune: DailyTune, db: Session, current_user_id: int):
         "profile_picture": user.profile_picture if user else None,
         "song_name": tune.song_name,
         "artist": tune.artist,
+        "spotify_id": tune.spotify_id,
+        "spotify_url": tune.spotify_url,
+        "cover_image": tune.cover_image,
         "likes": likes,
         "dislikes": dislikes,
         "my_reaction": my_reaction.reaction_type if my_reaction else None,
@@ -65,7 +71,14 @@ def post_tune(req: PostTuneRequest, db: Session = Depends(get_db), current_user:
     if existing:
         raise HTTPException(status_code=400, detail="You already posted your tune for today.")
 
-    tune = DailyTune(user_id=current_user.id, song_name=req.song_name, artist=req.artist)
+    tune = DailyTune(
+        user_id=current_user.id,
+        song_name=req.song_name,
+        artist=req.artist,
+        spotify_id=req.spotify_id,
+        spotify_url=req.spotify_url,
+        cover_image=req.cover_image,
+    )
     db.add(tune)
 
     # Update streak

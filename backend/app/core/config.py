@@ -14,7 +14,10 @@ class Settings(BaseSettings):
 
     SPOTIFY_CLIENT_ID: str = ""
     SPOTIFY_CLIENT_SECRET: str = ""
-    SPOTIFY_REDIRECT_URI: str = "http://localhost:5173/spotify/callback"
+    SPOTIFY_REDIRECT_URI: str = "http://127.0.0.1:5173/spotify/callback"
+
+    # Set FORCE_MOCK_MODE=true in .env to always use mock Spotify data (useful for demos)
+    FORCE_MOCK_MODE: bool = False
 
     class Config:
         env_file = ".env"

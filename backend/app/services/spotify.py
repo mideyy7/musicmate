@@ -9,6 +9,8 @@ from app.core.config import settings
 
 
 def is_mock_mode() -> bool:
+    if settings.FORCE_MOCK_MODE:
+        return True
     return not settings.SPOTIFY_CLIENT_ID or settings.SPOTIFY_CLIENT_ID == "your_spotify_client_id_here"
 
 
@@ -78,7 +80,7 @@ SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
 SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_API_BASE = "https://api.spotify.com/v1"
 
-SCOPES = "user-top-read user-read-recently-played user-read-playback-state user-library-read playlist-modify-public playlist-modify-private"
+SCOPES = "user-top-read user-read-recently-played user-read-playback-state user-library-read user-library-modify playlist-modify-public playlist-modify-private"
 
 
 def get_auth_url(state: str = "") -> str:
@@ -239,6 +241,41 @@ def build_music_profile(top_artists: list[dict], top_tracks: list[dict], recent_
         "recent_tracks": recent_tracks,
         "listening_patterns": listening_patterns,
     }
+
+
+# --- Search ---
+
+def search_tracks(access_token: str, query: str, limit: int = 10) -> list[dict]:
+    """Search Spotify for tracks matching a query."""
+    response = httpx.get(
+        f"{SPOTIFY_API_BASE}/search",
+        headers={"Authorization": f"Bearer {access_token}"},
+        params={"q": query, "type": "track", "limit": limit},
+    )
+    response.raise_for_status()
+    items = response.json().get("tracks", {}).get("items", [])
+    return [
+        {
+            "track_name": track["name"],
+            "artist": ", ".join(a["name"] for a in track["artists"]),
+            "album": track["album"]["name"],
+            "image_url": track["album"]["images"][0]["url"] if track["album"].get("images") else None,
+            "spotify_id": track["id"],
+            "spotify_url": track["external_urls"].get("spotify"),
+        }
+        for track in items
+    ]
+
+
+def save_track_to_library(access_token: str, track_id: str) -> bool:
+    """Save a track to the user's Spotify Liked Songs."""
+    response = httpx.put(
+        f"{SPOTIFY_API_BASE}/me/tracks",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={"ids": [track_id]},
+    )
+    response.raise_for_status()
+    return True
 
 
 # --- Playlist functions ---

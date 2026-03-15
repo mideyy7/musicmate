@@ -8,6 +8,9 @@ class DailyTune(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     song_name = Column(String, nullable=False)
     artist = Column(String, nullable=False)
+    spotify_id = Column(String, nullable=True)
+    spotify_url = Column(String, nullable=True)
+    cover_image = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class Reaction(Base):
