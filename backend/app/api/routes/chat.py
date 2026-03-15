@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from datetime import datetime, timedelta
+
 from app.api.deps import get_current_user, get_db
 from app.crud.match import get_match_by_id, get_matches
 from app.crud.message import create_message, get_messages, get_unread_count, mark_messages_read
+from app.crud.spotify import get_spotify_tokens, save_spotify_tokens
 from app.models.user import User
 from app.schemas.message import (
     MessageResponse,
@@ -11,7 +14,7 @@ from app.schemas.message import (
     SongSearchResult,
     UnreadCountResponse,
 )
-from app.services.spotify import is_mock_mode
+from app.services.spotify import is_mock_mode, refresh_access_token, search_tracks
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
@@ -134,8 +137,9 @@ def chat_prompts():
 def search_song(
     q: str = Query(..., min_length=1),
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
-    """Search for songs to share in chat."""
+    """Search for songs to share in chat. Uses real Spotify search when connected."""
     query = q.lower()
 
     if is_mock_mode():
@@ -145,13 +149,35 @@ def search_song(
         ]
         return results[:10]
 
-    # When real Spotify keys are provided, use the Spotify search API
-    import httpx
-    from app.core.config import settings
+    # Use real Spotify search API
+    tokens = get_spotify_tokens(db, current_user.id)
+    if not tokens:
+        # Fall back to mock if user hasn't connected Spotify
+        results = [
+            s for s in MOCK_SONG_RESULTS
+            if query in s["track_name"].lower() or query in s["artist"].lower()
+        ]
+        return results[:10]
 
-    # For now return mock results — real Spotify search would go here
-    results = [
-        s for s in MOCK_SONG_RESULTS
-        if query in s["track_name"].lower() or query in s["artist"].lower()
-    ]
-    return results[:10]
+    access_token = tokens.access_token
+    if tokens.expires_at <= datetime.utcnow():
+        try:
+            refreshed = refresh_access_token(tokens.refresh_token)
+            save_spotify_tokens(
+                db, current_user.id,
+                access_token=refreshed["access_token"],
+                refresh_token=refreshed["refresh_token"],
+                expires_at=refreshed["expires_at"],
+            )
+            access_token = refreshed["access_token"]
+        except Exception:
+            pass
+
+    try:
+        return search_tracks(access_token, q.strip())
+    except Exception:
+        results = [
+            s for s in MOCK_SONG_RESULTS
+            if query in s["track_name"].lower() or query in s["artist"].lower()
+        ]
+        return results[:10]

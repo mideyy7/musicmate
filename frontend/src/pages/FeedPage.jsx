@@ -95,13 +95,24 @@ export default function FeedPage() {
               {campus_top_50.slice(0, 5).map(item => (
                 <div key={item.rank} className="top50-item">
                   <div className={`top50-rank ${rankClass(item.rank)}`}>{item.rank}</div>
-                  <div className="top50-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                    ♪
-                  </div>
+                  {item.cover_image
+                    ? <img src={item.cover_image} alt={item.song_name} style={{ width: 36, height: 36, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }} />
+                    : <div className="top50-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>♪</div>
+                  }
                   <div className="top50-info">
                     <div className="top50-song">{item.song_name}</div>
                     <div className="top50-artist">{item.artist}</div>
                   </div>
+                  <button
+                    onClick={() => {
+                      const url = item.spotify_url || item.spotify_id
+                        ? `https://open.spotify.com/track/${item.spotify_id}`
+                        : `https://open.spotify.com/search/${encodeURIComponent(`${item.song_name} ${item.artist}`)}`;
+                      window.open(url, '_blank', 'noopener');
+                    }}
+                    title="Play on Spotify"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1db954', fontSize: '1rem', padding: '0 4px', marginLeft: 'auto', flexShrink: 0 }}
+                  >▶</button>
                 </div>
               ))}
             </div>
@@ -128,6 +139,16 @@ export default function FeedPage() {
                       <div className="friend-fav-playing">{fav.display_name} is playing...</div>
                       <div className="friend-fav-song">{fav.song_name} - {fav.artist}</div>
                     </div>
+                    <button
+                      onClick={() => {
+                        const url = fav.spotify_url || fav.spotify_id
+                          ? `https://open.spotify.com/track/${fav.spotify_id}`
+                          : `https://open.spotify.com/search/${encodeURIComponent(`${fav.song_name} ${fav.artist}`)}`;
+                        window.open(url, '_blank', 'noopener');
+                      }}
+                      title="Play on Spotify"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1db954', fontSize: '1rem', padding: '0 4px', marginLeft: 'auto', flexShrink: 0 }}
+                    >▶</button>
                   </div>
                 ))
               )}

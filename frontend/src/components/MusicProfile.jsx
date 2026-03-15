@@ -1,9 +1,37 @@
 import { useState } from 'react';
-import { syncSpotifyProfile, disconnectSpotify } from '../services/api';
+import { syncSpotifyProfile, disconnectSpotify, saveTrackToSpotify } from '../services/api';
+
+function openSpotifyArtist(artist) {
+  if (artist.spotify_url) {
+    window.open(artist.spotify_url, '_blank', 'noopener');
+  } else {
+    window.open(`https://open.spotify.com/search/${encodeURIComponent(artist.name)}`, '_blank', 'noopener');
+  }
+}
+
+function openSpotifyTrack(track) {
+  if (track.spotify_url) {
+    window.open(track.spotify_url, '_blank', 'noopener');
+  } else if (track.spotify_id) {
+    window.open(`https://open.spotify.com/track/${track.spotify_id}`, '_blank', 'noopener');
+  } else {
+    window.open(`https://open.spotify.com/search/${encodeURIComponent(`${track.name} ${track.artist}`)}`, '_blank', 'noopener');
+  }
+}
 
 export default function MusicProfile({ profile, onUpdate, onDisconnect }) {
   const [syncing, setSyncing] = useState(false);
   const [message, setMessage] = useState('');
+  const [savedTracks, setSavedTracks] = useState({});
+
+  async function handleSaveTrack(track, key) {
+    if (!track.spotify_id) { openSpotifyTrack(track); return; }
+    try {
+      await saveTrackToSpotify(track.spotify_id);
+      setSavedTracks(prev => ({ ...prev, [key]: true }));
+      setTimeout(() => setSavedTracks(prev => { const n = {...prev}; delete n[key]; return n; }), 3000);
+    } catch { /* ignore */ }
+  }
 
   async function handleSync() {
     setSyncing(true);
@@ -86,7 +114,7 @@ export default function MusicProfile({ profile, onUpdate, onDisconnect }) {
           <h4>Top Artists</h4>
           <div className="artists-grid">
             {top_artists.slice(0, 8).map((artist, i) => (
-              <div key={i} className="artist-card">
+              <div key={i} className="artist-card" style={{ position: 'relative' }}>
                 {artist.image_url ? (
                   <img src={artist.image_url} alt={artist.name} className="artist-img" />
                 ) : (
@@ -94,6 +122,11 @@ export default function MusicProfile({ profile, onUpdate, onDisconnect }) {
                 )}
                 <span className="artist-name">{artist.name}</span>
                 <span className="artist-rank">#{artist.rank}</span>
+                <button
+                  onClick={() => openSpotifyArtist(artist)}
+                  title={`Play ${artist.name} on Spotify`}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1db954', fontSize: '0.85rem', padding: '2px 0', marginTop: '2px' }}
+                >▶</button>
               </div>
             ))}
           </div>
@@ -129,6 +162,18 @@ export default function MusicProfile({ profile, onUpdate, onDisconnect }) {
                 <div className="track-info">
                   <span className="track-name">{track.name}</span>
                   <span className="track-artist">{track.artist}</span>
+                </div>
+                <div style={{ display: 'flex', gap: '0.4rem', marginLeft: 'auto', flexShrink: 0 }}>
+                  <button
+                    onClick={() => openSpotifyTrack(track)}
+                    title="Play on Spotify"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1db954', fontSize: '1rem', padding: '0 4px' }}
+                  >▶</button>
+                  <button
+                    onClick={() => handleSaveTrack(track, `track-${i}`)}
+                    title="Save to Liked Songs"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: savedTracks[`track-${i}`] ? '#1db954' : 'var(--text-muted)', fontSize: '0.75rem', padding: '0 4px' }}
+                  >{savedTracks[`track-${i}`] ? '✓' : '+'}</button>
                 </div>
               </div>
             ))}

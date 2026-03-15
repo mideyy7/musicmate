@@ -190,6 +190,44 @@ def spotify_profile(
     )
 
 
+@router.get("/search")
+def spotify_search(
+    q: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Search Spotify for tracks. Returns track name, artist, album, cover image and Spotify link."""
+    if not q or not q.strip():
+        return []
+    if is_mock_mode():
+        from app.api.routes.chat import MOCK_SONG_RESULTS
+        query = q.lower()
+        results = [s for s in MOCK_SONG_RESULTS if query in s["track_name"].lower() or query in s["artist"].lower()]
+        return results[:10]
+    try:
+        access_token = _get_valid_token(db, current_user.id)
+        return search_tracks(access_token, q.strip())
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"Spotify search failed: {str(e)}")
+
+
+@router.post("/save-track")
+def spotify_save_track(
+    track_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Save a track to the user's Spotify Liked Songs."""
+    if is_mock_mode():
+        return {"saved": True, "mock": True}
+    try:
+        access_token = _get_valid_token(db, current_user.id)
+        save_track_to_library(access_token, track_id)
+        return {"saved": True}
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"Failed to save track: {str(e)}")
+
+
 @router.delete("/disconnect")
 def spotify_disconnect(
     current_user: User = Depends(get_current_user),

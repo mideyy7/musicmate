@@ -85,6 +85,14 @@ export function getSpotifyStatus() {
   return request('/spotify/status');
 }
 
+export function searchSpotifySongs(q) {
+  return request(`/spotify/search?q=${encodeURIComponent(q)}`);
+}
+
+export function saveTrackToSpotify(trackId) {
+  return request(`/spotify/save-track?track_id=${encodeURIComponent(trackId)}`, { method: 'POST' });
+}
+
 export function syncSpotifyProfile() {
   return request('/spotify/sync', { method: 'POST' });
 }
@@ -216,10 +224,10 @@ export function getPosts() {
   return request('/posts');
 }
 
-export function postTune({ song_name, artist }) {
+export function postTune({ song_name, artist, spotify_id, spotify_url, cover_image }) {
   return request('/posts', {
     method: 'POST',
-    body: JSON.stringify({ song_name, artist }),
+    body: JSON.stringify({ song_name, artist, spotify_id, spotify_url, cover_image }),
   });
 }
 
