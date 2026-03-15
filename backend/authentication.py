@@ -12,14 +12,14 @@ import re
 
 DATABASE_FILE = "users.json"
 
-
+# Load current users from json file
 def load_users():
     if not os.path.exists(DATABASE_FILE):
         return {}
     with open(DATABASE_FILE, "r") as f:
         return json.load(f)
 
-
+# Save users to json file
 def save_users(users):
     with open(DATABASE_FILE, "w") as f:
         json.dump(users, f, indent=4)
@@ -32,7 +32,9 @@ app = FastAPI()
 # Required for sessions
 app.add_middleware(
     SessionMiddleware,
-    secret_key="f7c0a3f5c6e1a9b4d2f6c7b8e4a1c6d0b9e5f4a6c8d1e3f5a7b9c2d4e9"
+    secret_key="f7c0a3f5c6e1a9b4d2f6c7b8e4a1c6d0b9e5f4a6c8d1e3f5a7b9c2d4e9",
+    same_site="none",      
+    https_only=True
 )
 
 CAS_BASE = "https://studentnet.cs.manchester.ac.uk/authenticate/"
@@ -57,10 +59,10 @@ def callback(request: Request):
     if "csticket" not in session:
         return HTMLResponse("Invalid session", status_code=400)
 
-    username = request.query_params.get("username")
+    uom_username = request.query_params.get("username")
     fullname = request.query_params.get("fullname")
 
-    if not username or not fullname:
+    if not uom_username or not fullname:
         return HTMLResponse("Authentication failed", status_code=400)
 
     # Verify with CAS
@@ -71,7 +73,7 @@ def callback(request: Request):
             "csticket": session["csticket"],
             "version": 3,
             "command": "confirm",
-            "username": username,
+            "username": uom_username,
             "fullname": fullname,
         },
         timeout=5,
@@ -80,16 +82,19 @@ def callback(request: Request):
     if verify.text.strip() != "true":
         return HTMLResponse("CAS verification failed", status_code=403)
 
-    # Log user in
+    # Check if a local account already has this UoM username
+    for user in USERS.values():
+        if user.get("uom_username") == uom_username:
+            session["user"] = user
+            session.pop("csticket", None)
+            return RedirectResponse("/dashboard")
+
+    # First-time UoM login -> save username in session for account creation
     session["user"] = {
-        "username": username,
+        "uom_username": uom_username,
         "fullname": fullname,
     }
     session.pop("csticket", None)
-
-    if username in USERS:   # Change to actual DB
-        session["user"] = USERS[username]
-        return RedirectResponse("/dashboard")
 
     return RedirectResponse("/create-account")
 
@@ -160,6 +165,7 @@ def create_account(
         "username": username,
         "display_name": display_name,
         "fullname": cas_user["fullname"],
+        "uom_username": cas_user.get("uom_username"),
         "password_hash": bcrypt.hash(password),
     }
 
@@ -269,4 +275,3 @@ def logout(request: Request):
 @app.get("/", response_class=HTMLResponse)
 def home():
     return HTMLResponse(login_page())
-
