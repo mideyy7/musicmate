@@ -9,13 +9,16 @@ export default function CasCallbackPage() {
   const { loginWithToken } = useAuth();
   const [error, setError] = useState('');
   const [status, setStatus] = useState('Verifying with University of Manchester...');
+  const calledRef = useRef(false);
 
   useEffect(() => {
+    if (calledRef.current) return;
+    calledRef.current = true;
+
     const username = searchParams.get('username');
     const fullname = searchParams.get('fullname');
     const csticket = localStorage.getItem('cas_csticket');
 
-    // Defer error display briefly so the loading screen shows first
     const fail = (msg) => setTimeout(() => setError(msg), 300);
 
     if (!username || !fullname) {
@@ -31,9 +34,12 @@ export default function CasCallbackPage() {
     async function complete() {
       try {
         setStatus('Setting up your account...');
-        localStorage.removeItem('cas_csticket');
         const { access_token, is_new_user } = await casComplete(username, fullname, csticket);
+        
+        // Remove ticket only AFTER successfully used
+        localStorage.removeItem('cas_csticket');
         localStorage.setItem('token', access_token);
+        
         setStatus('Loading your profile...');
         const user = await getMe();
         loginWithToken(access_token, user);
@@ -44,7 +50,7 @@ export default function CasCallbackPage() {
             state: { casData: { display_name: fullname, username } },
           });
         } else {
-          navigate('/', { replace: true });
+          navigate('/home', { replace: true });
         }
       } catch (err) {
         setError(err.message);
