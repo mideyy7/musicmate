@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
@@ -30,12 +30,13 @@ def get_post_response(tune: DailyTune, db: Session, current_user_id: int):
 
     # Compute time ago
     diff = datetime.utcnow() - tune.created_at
-    if diff.seconds < 3600:
-        time_ago = f"{diff.seconds // 60} minutes ago"
-    elif diff.days == 0:
-        time_ago = f"{diff.seconds // 3600} hours ago"
-    else:
+    total_seconds = int(diff.total_seconds())
+    if diff.days >= 1:
         time_ago = f"{diff.days} days ago"
+    elif total_seconds >= 3600:
+        time_ago = f"{total_seconds // 3600} hours ago"
+    else:
+        time_ago = f"{max(total_seconds // 60, 1)} minutes ago"
 
     return {
         "id": tune.id,
@@ -85,7 +86,8 @@ def post_tune(req: PostTuneRequest, db: Session = Depends(get_db), current_user:
     db.add(tune)
 
     # Update streak
-    if current_user.last_tune_date == (date.today().replace(day=date.today().day - 1)).isoformat():
+    yesterday = (date.today() - timedelta(days=1)).isoformat()
+    if current_user.last_tune_date == yesterday:
         current_user.daily_tune_streak = (current_user.daily_tune_streak or 0) + 1
     else:
         current_user.daily_tune_streak = 1

@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, JSON
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from app.core.database import Base
 
 class DailyTune(Base):
@@ -21,3 +21,7 @@ class Reaction(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     reaction_type = Column(String, nullable=False)  # "like", "dislike"
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("daily_tune_id", "user_id", name="uq_reaction_tune_user"),
+    )

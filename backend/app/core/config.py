@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     SPOTIFY_CLIENT_ID: str = ""
     SPOTIFY_CLIENT_SECRET: str = ""
-    SPOTIFY_REDIRECT_URI: str = "http://127.0.0.1:5173/spotify/callback"
+    SPOTIFY_REDIRECT_URI: str = "http://localhost:5173/spotify/callback"
 
     LASTFM_API_KEY: str = ""
 

@@ -5,7 +5,7 @@ import uvicorn
 import os
 
 from app.core.database import Base, engine
-from app.models import User, SpotifyToken, MusicProfile, Swipe, Match, Message, SharedPlaylist, PlaylistMember, WeeklyRecap, DailyTune, Reaction  # noqa: F401
+from app.models import User, SpotifyToken, MusicProfile, Swipe, Match, Message, SharedPlaylist, PlaylistMember, WeeklyRecap, DailyTune, Reaction, CASTicket  # noqa: F401
 from app.api.routes.auth import router as auth_router
 from app.api.routes.spotify import router as spotify_router
 from app.api.routes.match import router as match_router
