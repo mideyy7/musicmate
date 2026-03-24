@@ -1,4 +1,4 @@
-#Create this folder structure
+#Folder structure and their purpose
 
 backend/
 ├── app/
@@ -20,9 +20,12 @@ backend/
 │   │   ├── deps.py            # Dependencies (DB session, auth)
 │   │   └── routes/
 │   │       └── user.py        # API routes
+|   |        |___ spotify.py     #API routes for spotify
 │   │
 │   └── __init__.py
 │
+│----── services/                   # External APIs & business logic
+│      └── spotify.py              # Spotify API logic (OAuth, requests)
 ├── db/
 │   └── app.db                 # SQLite database file
 │

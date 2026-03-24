@@ -1,0 +1,248 @@
+const API_BASE = '/api';
+
+async function request(endpoint, options = {}) {
+  const token = localStorage.getItem('token');
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.detail || 'Something went wrong');
+  }
+
+  return data;
+}
+
+// UoM CAS authentication
+export function casInitiate(callbackUrl) {
+  return request(`/auth/cas/initiate?callback_url=${encodeURIComponent(callbackUrl)}`);
+}
+
+export function casComplete(username, fullname, csticket) {
+  return request('/auth/cas/complete', {
+    method: 'POST',
+    body: JSON.stringify({ username, fullname, csticket }),
+  });
+}
+
+export function ssoInitiate(email) {
+  return request('/auth/sso/initiate', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function ssoComplete(userData) {
+  return request('/auth/sso/complete', {
+    method: 'POST',
+    body: JSON.stringify(userData),
+  });
+}
+
+export function login(email, password) {
+  return request('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export function getMe() {
+  return request('/auth/me');
+}
+
+export function updateProfile(updates) {
+  return request('/auth/me', {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  });
+}
+
+// Spotify
+export function getSpotifyAuthUrl() {
+  return request('/spotify/auth-url');
+}
+
+export function spotifyCallback(code) {
+  return request('/spotify/callback', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+}
+
+export function getSpotifyStatus() {
+  return request('/spotify/status');
+}
+
+export function searchSpotifySongs(q) {
+  return request(`/spotify/search?q=${encodeURIComponent(q)}`);
+}
+
+export function saveTrackToSpotify(trackId) {
+  return request(`/spotify/save-track?track_id=${encodeURIComponent(trackId)}`, { method: 'POST' });
+}
+
+export function syncSpotifyProfile() {
+  return request('/spotify/sync', { method: 'POST' });
+}
+
+export function getMusicProfile() {
+  return request('/spotify/profile');
+}
+
+export function disconnectSpotify() {
+  return request('/spotify/disconnect', { method: 'DELETE' });
+}
+
+// Match
+export function getMatchFeed(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.course) params.set('course', filters.course);
+  if (filters.year) params.set('year', filters.year);
+  if (filters.faculty) params.set('faculty', filters.faculty);
+  const qs = params.toString();
+  return request(`/match/feed${qs ? `?${qs}` : ''}`);
+}
+
+export function swipe(targetUserId, action) {
+  return request('/match/swipe', {
+    method: 'POST',
+    body: JSON.stringify({ target_user_id: targetUserId, action }),
+  });
+}
+
+export function getMatches() {
+  return request('/match/matches');
+}
+
+// Chat
+export function getConversation(matchId, limit = 50, offset = 0) {
+  return request(`/chat/${matchId}?limit=${limit}&offset=${offset}`);
+}
+
+export function sendMessage(matchId, data) {
+  return request(`/chat/${matchId}`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export function markAsRead(matchId) {
+  return request(`/chat/${matchId}/read`, { method: 'PUT' });
+}
+
+export function getUnreadCount() {
+  return request('/chat/unread/count');
+}
+
+export function searchSong(query) {
+  return request(`/chat/search-song/results?q=${encodeURIComponent(query)}`);
+}
+
+export function getChatPrompts() {
+  return request('/chat/prompts/list');
+}
+
+// Playlists
+export function getPlaylists() {
+  return request('/playlist');
+}
+
+export function getPlaylist(playlistId) {
+  return request(`/playlist/${playlistId}`);
+}
+
+export function createPlaylist(data) {
+  return request('/playlist', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export function addTrackToPlaylist(playlistId, track) {
+  return request(`/playlist/${playlistId}/tracks`, {
+    method: 'POST',
+    body: JSON.stringify(track),
+  });
+}
+
+export function removeTrackFromPlaylist(playlistId, spotifyId) {
+  return request(`/playlist/${playlistId}/tracks/${spotifyId}`, {
+    method: 'DELETE',
+  });
+}
+
+export function addPlaylistMember(playlistId, userId) {
+  return request(`/playlist/${playlistId}/members`, {
+    method: 'POST',
+    body: JSON.stringify({ user_id: userId }),
+  });
+}
+
+export function removePlaylistMember(playlistId, userId) {
+  return request(`/playlist/${playlistId}/members/${userId}`, {
+    method: 'DELETE',
+  });
+}
+
+export function getWeeklyRecap(playlistId) {
+  return request(`/playlist/${playlistId}/recap`);
+}
+
+export function autoCreatePlaylist(matchId) {
+  return request(`/playlist/auto-create/${matchId}`, { method: 'POST' });
+}
+
+// Profile picture upload
+export async function uploadProfilePicture(file) {
+  const token = localStorage.getItem('token');
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await fetch('/api/auth/me/picture', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || 'Upload failed');
+  return data;
+}
+
+// Posts (Daily Tunes - Phase 6)
+export function getPosts() {
+  return request('/posts');
+}
+
+export function postTune({ song_name, artist, spotify_id, spotify_url, cover_image, preview_url }) {
+  return request('/posts', {
+    method: 'POST',
+    body: JSON.stringify({ song_name, artist, spotify_id, spotify_url, cover_image, preview_url }),
+  });
+}
+
+export function reactToTune(tuneId, reaction_type) {
+  return request(`/posts/${tuneId}/react`, {
+    method: 'POST',
+    body: JSON.stringify({ reaction_type }),
+  });
+}
+
+export function deletePost(tuneId) {
+  return request(`/posts/${tuneId}`, { method: 'DELETE' });
+}
+
+// Feed (Campus Pulse - Phase 6)
+export function getCampusPulse() {
+  return request('/feed');
+}

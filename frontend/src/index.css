@@ -1,20 +1,38 @@
-body{
-  margin: 0px;
-  background-image: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-  font-family: 'SN Pro', sans-serif;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
+:root {
+  --primary: #927AFA;
+  --primary-dark: #7B62F0;
+  --accent: #FF5E5E;
+  --accent-alt: #4CD964;
+  --bg: #1e1e36;
+  --bg-nav: #14142B;
+  --bg-card: #2B2A4A;
+  --bg-input: #1F1E38;
+  --text: #F3F3F3;
+  --text-muted: #A3A3B8;
+  --error: #E35E5E;
+  --success: #46A36E;
+  --border: #3A3959;
 
-/* Colour codes
-Primary Accent #8a6fe8
-Primary Accent (hover) #735ac4
-Background Gradient  linear-gradient(135deg,#0f0c29, #302b63, #24243e)
-Glass Background rgba(255,255,255,0.05)
-Glass border rgba(255,255,255,0.1)
-Success/Spotify #4caf50/#1db954
-Danger/Error #ff4b4b
-Main Text #ffffff
-Muted text #d1d1d1 */
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-size: 15px;
+  color: var(--text);
+  background-color: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
