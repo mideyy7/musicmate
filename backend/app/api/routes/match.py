@@ -38,17 +38,11 @@ def match_feed(
     """Get swipe-ready candidates with compatibility scores."""
     my_profile = get_music_profile(db, current_user.id)
     if not my_profile:
-        if is_mock_mode():
-            from app.services.spotify import generate_mock_profile
-            from app.crud.spotify import save_music_profile
-            profile_data = generate_mock_profile(current_user.id)
-            save_music_profile(db, current_user.id, profile_data)
-            my_profile = get_music_profile(db, current_user.id)
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Please sync your music profile first.",
-            )
+        from app.services.spotify import generate_mock_profile
+        from app.crud.spotify import save_music_profile
+        profile_data = generate_mock_profile(current_user.id)
+        save_music_profile(db, current_user.id, profile_data)
+        my_profile = get_music_profile(db, current_user.id)
 
     candidates = get_candidates(db, current_user.id, course, year, faculty)
 

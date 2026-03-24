@@ -62,7 +62,7 @@ export default function MiniPlayer() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
         {/* Pause / Resume */}
         <button
-          onClick={() => playTrack(currentTrackId)}
+          onClick={() => playTrack(currentTrackId, null, currentTrackInfo)}
           title={isPlaying ? 'Pause' : 'Resume'}
           style={{
             background: 'rgba(29,185,84,0.15)',

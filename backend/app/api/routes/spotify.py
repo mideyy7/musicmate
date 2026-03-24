@@ -240,6 +240,28 @@ def get_spotify_token(
     return {"access_token": access_token}
 
 
+@router.get("/preview/{track_id}")
+def get_track_preview(
+    track_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return the 30-second preview URL for a Spotify track."""
+    if is_mock_mode():
+        return {"preview_url": None}
+    try:
+        access_token = _get_valid_token(db, current_user.id)
+        import httpx as _httpx
+        r = _httpx.get(
+            f"https://api.spotify.com/v1/tracks/{track_id}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        r.raise_for_status()
+        return {"preview_url": r.json().get("preview_url")}
+    except Exception:
+        return {"preview_url": None}
+
+
 @router.delete("/disconnect")
 def spotify_disconnect(
     current_user: User = Depends(get_current_user),

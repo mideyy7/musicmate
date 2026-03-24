@@ -10,32 +10,35 @@ function SpotifyIcon() {
 
 /**
  * TrackActions — two buttons for every track:
- *   1. ▶/⏸  Play/pause via Spotify Web Playback SDK (requires Premium)
+ *   1. ▶/⏸  Play via Spotify SDK (Premium) or 30-second audio preview fallback
  *   2.  🟢  Open in Spotify
  *
  * Props:
- *   track — object with any of: spotify_id, spotify_url, track_name | name, artist
+ *   track — { spotify_id, spotify_url, track_name|name, artist, preview_url? }
  */
 export default function TrackActions({ track }) {
   const player = useSpotifyPlayer();
 
   const spotifyId = track?.spotify_id;
+  const previewUrl = track?.preview_url || null;
+  const trackName = track?.track_name || track?.name || '';
+  const artist = track?.artist || '';
+
   const spotifyUrl =
     track?.spotify_url ||
     (spotifyId ? `https://open.spotify.com/track/${spotifyId}` : null) ||
-    `https://open.spotify.com/search/${encodeURIComponent(
-      `${track?.track_name || track?.name || ''} ${track?.artist || ''}`
-    )}`;
+    `https://open.spotify.com/search/${encodeURIComponent(`${trackName} ${artist}`)}`;
 
   const isThisTrackPlaying =
     player?.isPlaying && player?.currentTrackId === spotifyId;
 
-  const canPlay = player?.isReady && !!spotifyId;
+  // Button is enabled whenever we have a spotify_id (can always try preview fallback)
+  const canPlay = !!spotifyId;
 
   function handlePlay(e) {
     e.stopPropagation();
     if (!canPlay) return;
-    player.playTrack(spotifyId);
+    player?.playTrack(spotifyId, previewUrl, { name: trackName, artist, imageUrl: null });
   }
 
   function handleSpotify(e) {
@@ -56,15 +59,11 @@ export default function TrackActions({ track }) {
     transition: 'opacity 0.15s',
   };
 
-  const playTitle = player?.isPremiumError
-    ? 'Requires Spotify Premium'
-    : !player?.isReady
-    ? 'Connecting to Spotify...'
-    : !spotifyId
-    ? 'No Spotify ID'
-    : isThisTrackPlaying
+  const playTitle = isThisTrackPlaying
     ? 'Pause'
-    : 'Play';
+    : player?.isReady
+    ? 'Play (Spotify Premium)'
+    : 'Play preview';
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0 }}>

@@ -10,6 +10,7 @@ from sqlalchemy import or_
 
 from app.models.user import User
 from app.models.match import Match
+from app.models.daily_tune import DailyTune, Reaction
 from app.crud.user import get_user_by_email
 from app.crud.match import create_swipe, get_swipe, create_match
 from app.crud.message import create_message
@@ -20,6 +21,20 @@ from app.services.auth import hash_password
 from app.services.spotify import generate_mock_profile
 from app.services.compatibility import compute_compatibility
 
+
+# Each demo student posts one of these tunes (real Spotify IDs from mock pool)
+DEMO_TUNES = [
+    {"song_name": "505",               "artist": "Arctic Monkeys",    "spotify_id": "0BxE4FqsDD1Ot4YuBXwAPp", "spotify_url": "https://open.spotify.com/track/0BxE4FqsDD1Ot4YuBXwAPp"},
+    {"song_name": "Blinding Lights",   "artist": "The Weeknd",        "spotify_id": "0VjIjW4GlUZAMYd2vXMi4",  "spotify_url": "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi4"},
+    {"song_name": "The Less I Know The Better", "artist": "Tame Impala", "spotify_id": "6K4t31amVTZDgR3sKmwUJJ", "spotify_url": "https://open.spotify.com/track/6K4t31amVTZDgR3sKmwUJJ"},
+    {"song_name": "Pink + White",      "artist": "Frank Ocean",       "spotify_id": "3xKsf9qdS1CyvXSMEid6g8",  "spotify_url": "https://open.spotify.com/track/3xKsf9qdS1CyvXSMEid6g8"},
+    {"song_name": "Kill Bill",         "artist": "SZA",               "spotify_id": "1Qrg8KqiBpW07V7PNxwwwL",  "spotify_url": "https://open.spotify.com/track/1Qrg8KqiBpW07V7PNxwwwL"},
+    {"song_name": "As It Was",         "artist": "Harry Styles",      "spotify_id": "4LRPiXqCikLlN15c3yImP7",  "spotify_url": "https://open.spotify.com/track/4LRPiXqCikLlN15c3yImP7"},
+    {"song_name": "Redbone",           "artist": "Childish Gambino",  "spotify_id": "0wXuerDYIBRqxJGzjEmjY4",  "spotify_url": "https://open.spotify.com/track/0wXuerDYIBRqxJGzjEmjY4"},
+    {"song_name": "Electric Feel",     "artist": "MGMT",              "spotify_id": "3FtYbEfBqAlGO46NUDQSAt",  "spotify_url": "https://open.spotify.com/track/3FtYbEfBqAlGO46NUDQSAt"},
+    {"song_name": "Heat Waves",        "artist": "Glass Animals",     "spotify_id": "02MWAaffLxlfxAUY7c5dvx",  "spotify_url": "https://open.spotify.com/track/02MWAaffLxlfxAUY7c5dvx"},
+    {"song_name": "Ivy",               "artist": "Frank Ocean",       "spotify_id": "2ZWlPOoWh0626oTaHrnl2a",  "spotify_url": "https://open.spotify.com/track/2ZWlPOoWh0626oTaHrnl2a"},
+]
 
 DEMO_STUDENTS = [
     # ── 6 pre-matched students ──────────────────────────────────────
@@ -223,7 +238,7 @@ def seed_demo_users(db: Session, real_user_id: int) -> None:
         save_music_profile(db, real_user_id, profile_data)
         real_profile = get_music_profile(db, real_user_id)
 
-    for data in DEMO_STUDENTS:
+    for i, data in enumerate(DEMO_STUDENTS):
         demo_user = _get_or_create_demo_user(db, data)
 
         # Ensure demo user has a music profile
@@ -232,6 +247,9 @@ def seed_demo_users(db: Session, real_user_id: int) -> None:
             profile_data = generate_mock_profile(data["seed_id"])
             save_music_profile(db, demo_user.id, profile_data)
             demo_profile = get_music_profile(db, demo_user.id)
+
+        # Seed a daily tune for this demo user (so they appear on Posts/Campus Pulse)
+        _seed_daily_tune(db, demo_user.id, DEMO_TUNES[i % len(DEMO_TUNES)], real_user_id)
 
         if not data["is_match"]:
             continue
@@ -284,6 +302,27 @@ def seed_demo_users(db: Session, real_user_id: int) -> None:
         # Seed opening messages from the demo user
         for text in data["messages"]:
             create_message(db, match.id, demo_user.id, text)
+
+
+def _seed_daily_tune(db: Session, demo_user_id: int, tune: dict, real_user_id: int) -> None:
+    """Post a daily tune for the demo user if they haven't posted one yet."""
+    existing = db.query(DailyTune).filter(DailyTune.user_id == demo_user_id).first()
+    if existing:
+        return
+    daily_tune = DailyTune(
+        user_id=demo_user_id,
+        song_name=tune["song_name"],
+        artist=tune["artist"],
+        spotify_id=tune["spotify_id"],
+        spotify_url=tune["spotify_url"],
+    )
+    db.add(daily_tune)
+    db.commit()
+    db.refresh(daily_tune)
+    # Add a like from the real user so it ranks in Campus Top 50
+    like = Reaction(daily_tune_id=daily_tune.id, user_id=real_user_id, reaction_type="like")
+    db.add(like)
+    db.commit()
 
 
 def _create_demo_playlist(db: Session, match: Match, real_user_id: int, demo_user: User) -> None:

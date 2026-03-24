@@ -20,6 +20,9 @@ def get_campus_pulse(db: Session = Depends(get_db), current_user: User = Depends
     top_songs_raw = db.query(
         DailyTune.song_name,
         DailyTune.artist,
+        func.max(DailyTune.spotify_id).label("spotify_id"),
+        func.max(DailyTune.spotify_url).label("spotify_url"),
+        func.max(DailyTune.cover_image).label("cover_image"),
         func.count(Reaction.id).label("like_count")
     ).outerjoin(Reaction, (Reaction.daily_tune_id == DailyTune.id) & (Reaction.reaction_type == "like")
     ).group_by(DailyTune.song_name, DailyTune.artist
@@ -27,7 +30,15 @@ def get_campus_pulse(db: Session = Depends(get_db), current_user: User = Depends
     ).limit(50).all()
 
     campus_top_50 = [
-        {"rank": i + 1, "song_name": row.song_name, "artist": row.artist, "likes": row.like_count}
+        {
+            "rank": i + 1,
+            "song_name": row.song_name,
+            "artist": row.artist,
+            "likes": row.like_count,
+            "spotify_id": row.spotify_id,
+            "spotify_url": row.spotify_url,
+            "cover_image": row.cover_image,
+        }
         for i, row in enumerate(top_songs_raw)
     ]
 
@@ -53,6 +64,9 @@ def get_campus_pulse(db: Session = Depends(get_db), current_user: User = Depends
                 "profile_picture": friend.profile_picture,
                 "song_name": last_tune.song_name,
                 "artist": last_tune.artist,
+                "spotify_id": last_tune.spotify_id,
+                "spotify_url": last_tune.spotify_url,
+                "cover_image": last_tune.cover_image,
             })
 
     # Campus Icons - most listened-to artists (from music profiles)

@@ -27,7 +27,11 @@ export default function SpotifyCallbackPage() {
         setStatus('Connecting to Spotify...');
         await spotifyCallback(code);
         setStatus('Syncing your music data...');
-        await syncSpotifyProfile();
+        try {
+          await syncSpotifyProfile();
+        } catch {
+          // Sync failure is non-fatal — homepage will auto-sync on load
+        }
         setStatus('All done! Redirecting...');
         setTimeout(() => navigate('/', { replace: true }), 400);
       } catch (err) {

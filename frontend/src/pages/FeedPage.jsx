@@ -6,16 +6,16 @@ import TrackActions from '../components/TrackActions';
 // Mock fallback data matching screenshots
 const MOCK_DATA = {
   campus_top_50: [
-    { rank: 1, song_name: 'Adullam', artist: 'Theophilus Sunday', likes: 42 },
-    { rank: 2, song_name: 'Our Father', artist: 'Don Moen', likes: 38 },
-    { rank: 3, song_name: 'All That Matters', artist: 'Minister GUC', likes: 31 },
-    { rank: 4, song_name: 'All We Want is You', artist: 'Darren Evans', likes: 24 },
-    { rank: 5, song_name: 'Holy Forever', artist: 'CeCe Winans', likes: 19 },
+    { rank: 1, song_name: '505', artist: 'Arctic Monkeys', likes: 42, spotify_id: '0BxE4FqsDD1Ot4YuBXwAPp', spotify_url: 'https://open.spotify.com/track/0BxE4FqsDD1Ot4YuBXwAPp' },
+    { rank: 2, song_name: 'Blinding Lights', artist: 'The Weeknd', likes: 38, spotify_id: '0VjIjW4GlUZAMYd2vXMi4', spotify_url: 'https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi4' },
+    { rank: 3, song_name: 'The Less I Know The Better', artist: 'Tame Impala', likes: 31, spotify_id: '6K4t31amVTZDgR3sKmwUJJ', spotify_url: 'https://open.spotify.com/track/6K4t31amVTZDgR3sKmwUJJ' },
+    { rank: 4, song_name: 'Pink + White', artist: 'Frank Ocean', likes: 24, spotify_id: '3xKsf9qdS1CyvXSMEid6g8', spotify_url: 'https://open.spotify.com/track/3xKsf9qdS1CyvXSMEid6g8' },
+    { rank: 5, song_name: 'As It Was', artist: 'Harry Styles', likes: 19, spotify_id: '4LRPiXqCikLlN15c3yImP7', spotify_url: 'https://open.spotify.com/track/4LRPiXqCikLlN15c3yImP7' },
   ],
   friend_favorites: [
-    { user_id: 1, display_name: 'Sarah', song_name: 'I will Pray', artist: 'Ebuka Songs', profile_picture: null },
-    { user_id: 2, display_name: 'David', song_name: 'There is a Place', artist: 'Paul Enenche', profile_picture: null },
-    { user_id: 3, display_name: 'Emily', song_name: 'Broken', artist: 'Kae Strings', profile_picture: null },
+    { user_id: 1, display_name: 'Emma', song_name: '505', artist: 'Arctic Monkeys', profile_picture: 'https://i.pravatar.cc/300?img=5', spotify_id: '0BxE4FqsDD1Ot4YuBXwAPp', spotify_url: 'https://open.spotify.com/track/0BxE4FqsDD1Ot4YuBXwAPp' },
+    { user_id: 2, display_name: 'James', song_name: 'Blinding Lights', artist: 'The Weeknd', profile_picture: 'https://i.pravatar.cc/300?img=33', spotify_id: '0VjIjW4GlUZAMYd2vXMi4', spotify_url: 'https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi4' },
+    { user_id: 3, display_name: 'Sophie', song_name: 'The Less I Know The Better', artist: 'Tame Impala', profile_picture: 'https://i.pravatar.cc/300?img=9', spotify_id: '6K4t31amVTZDgR3sKmwUJJ', spotify_url: 'https://open.spotify.com/track/6K4t31amVTZDgR3sKmwUJJ' },
   ],
   campus_icons: [
     { name: 'Theophilus Sunday', image_url: null, count: 18 },

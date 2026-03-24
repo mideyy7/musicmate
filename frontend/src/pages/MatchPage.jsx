@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getMatchFeed, swipe } from '../services/api';
 import NavBar from '../components/NavBar';
 
 export default function MatchPage() {
+  const navigate = useNavigate();
   const [candidates, setCandidates] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -41,7 +43,9 @@ export default function MatchPage() {
       const result = await swipe(candidate.user_id, action);
       if (result.is_match) {
         setMatchOverlay({
+          matchId: result.match_id,
           name: candidate.display_name,
+          profilePicture: candidate.profile_picture,
           score: candidate.compatibility_score,
           sharedArtists: candidate.breakdown?.shared_artists || [],
         });
@@ -149,8 +153,19 @@ export default function MatchPage() {
 
       {matchOverlay && (
         <div className="match-overlay" onClick={dismissMatch}>
-          <div className="match-overlay-content">
+          <div className="match-overlay-content" onClick={e => e.stopPropagation()}>
             <div className="match-sparkle">★</div>
+            {matchOverlay.profilePicture ? (
+              <img
+                src={matchOverlay.profilePicture}
+                alt={matchOverlay.name}
+                style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '3px solid #1db954', margin: '0.5rem auto 1rem' }}
+              />
+            ) : (
+              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(29,185,84,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0.5rem auto 1rem' }}>
+                {matchOverlay.name.charAt(0)}
+              </div>
+            )}
             <h1>It's a Match!</h1>
             <p>You and <strong>{matchOverlay.name}</strong> both liked each other</p>
             <div className="match-score">{Math.round(matchOverlay.score)}% Compatible</div>
@@ -164,9 +179,17 @@ export default function MatchPage() {
                 </div>
               </div>
             )}
-            <button className="btn-primary" style={{ marginTop: '1.5rem' }} onClick={dismissMatch}>
-              Keep Swiping
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', justifyContent: 'center' }}>
+              <button
+                className="btn-primary"
+                onClick={() => { dismissMatch(); navigate(`/friends/${matchOverlay.matchId}`); }}
+              >
+                💬 Message them!
+              </button>
+              <button className="btn-secondary" onClick={dismissMatch}>
+                Keep Swiping
+              </button>
+            </div>
           </div>
         </div>
       )}
