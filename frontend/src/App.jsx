@@ -13,6 +13,7 @@ import MatchPage from './pages/MatchPage';
 import FriendsPage from './pages/FriendsPage';
 import PostsPage from './pages/PostsPage';
 import FeedPage from './pages/FeedPage';
+import LandingPage from './pages/LandingPage';
 import './App.css';
 
 function App() {
@@ -25,8 +26,9 @@ function App() {
           <Route path="/sso" element={<SSOPage />} />
           <Route path="/cas/callback" element={<CasCallbackPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route path="/" element={<LandingPage />} />
           <Route
-            path="/"
+            path="/home"
             element={
               <ProtectedRoute>
                 <HomePage />

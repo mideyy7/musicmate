@@ -37,7 +37,7 @@ export default function SpotifyCallbackPage() {
           // Sync failure is non-fatal — homepage will auto-sync on load
         }
         setStatus('All done! Redirecting...');
-        setTimeout(() => navigate('/', { replace: true }), 400);
+        setTimeout(() => navigate('/home', { replace: true }), 400);
       } catch (err) {
         setError(err.message);
       }
@@ -55,7 +55,7 @@ export default function SpotifyCallbackPage() {
             <button
               className="btn-primary"
               style={{ marginTop: '1rem' }}
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/home')}
             >
               Back to Dashboard
             </button>

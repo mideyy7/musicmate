@@ -21,7 +21,7 @@ export default function LoginPage() {
       localStorage.setItem('token', access_token);
       const user = await getMe();
       loginWithToken(access_token, user);
-      navigate('/');
+      navigate('/home');
     } catch (err) {
       setError(err.message);
     } finally {

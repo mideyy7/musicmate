@@ -94,7 +94,7 @@ export default function OnboardingPage() {
         loginWithToken(access_token, user);
       }
 
-      navigate('/');
+      navigate('/home');
     } catch (err) {
       setError(err.message);
     } finally {

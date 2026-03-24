@@ -5,7 +5,7 @@ export default function NavBar() {
   const navigate = useNavigate();
 
   const tabs = [
-    { path: '/', label: 'Home' },
+    { path: '/home', label: 'Home' },
     { path: '/match', label: 'Match' },
     { path: '/friends', label: 'Friends' },
     { path: '/posts', label: 'Posts' },
@@ -13,13 +13,13 @@ export default function NavBar() {
   ];
 
   function isActive(path) {
-    if (path === '/') return location.pathname === '/';
+    if (path === '/home') return location.pathname === '/home';
     return location.pathname.startsWith(path);
   }
 
   return (
     <nav className="top-navbar">
-      <div className="navbar-brand" onClick={() => navigate('/')}>
+      <div className="navbar-brand" onClick={() => navigate('/home')}>
         <div className="navbar-logo">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
