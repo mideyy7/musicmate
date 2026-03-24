@@ -14,46 +14,46 @@ def is_mock_mode() -> bool:
     return not settings.SPOTIFY_CLIENT_ID or settings.SPOTIFY_CLIENT_ID == "your_spotify_client_id_here"
 
 
-# Pool of mock data for generating realistic profiles
+# Pool of mock data for generating realistic gospel music profiles
 MOCK_ARTISTS_POOL = [
-    {"name": "Arctic Monkeys", "spotify_id": "7Ln80lUS6He07XvHI8qqHH", "genres": ["indie rock", "rock", "sheffield indie"]},
-    {"name": "Tame Impala", "spotify_id": "5INjqkS1o8h1imAzPqGZBb", "genres": ["psychedelic rock", "indie rock", "neo-psychedelia"]},
-    {"name": "Kendrick Lamar", "spotify_id": "2YZyLoL8N0Wb9xBt1NhZWg", "genres": ["hip hop", "rap", "west coast rap"]},
-    {"name": "Doja Cat", "spotify_id": "5cj0lLjcoR7YOSnhnX0Po5", "genres": ["pop", "dance pop", "rap"]},
-    {"name": "The Weeknd", "spotify_id": "1Xyo4u8uXC1ZmMpatF05PJ", "genres": ["r&b", "pop", "canadian pop"]},
-    {"name": "Tyler, The Creator", "spotify_id": "4V8LLVI7PbaPR0K2TGSxFF", "genres": ["hip hop", "rap", "alternative hip hop"]},
-    {"name": "Frank Ocean", "spotify_id": "2h93pZq0e7k5yf4dywlkpM", "genres": ["r&b", "alternative r&b", "neo soul"]},
-    {"name": "SZA", "spotify_id": "7tYKF4w9nC0nq9CsPZTHyP", "genres": ["r&b", "pop", "alternative r&b"]},
-    {"name": "Radiohead", "spotify_id": "4Z8W4fKeB5YxbusRsdQVPb", "genres": ["alternative rock", "art rock", "electronic"]},
-    {"name": "Steve Lacy", "spotify_id": "57vWImR43h4CaDao012Ofp", "genres": ["r&b", "indie soul", "bedroom pop"]},
-    {"name": "Billie Eilish", "spotify_id": "6qqNVTkY8uBg9cP3Jd7DAH", "genres": ["pop", "electropop", "art pop"]},
-    {"name": "Mac DeMarco", "spotify_id": "3Sz7ZnJQBIHsXLUSo0OQtM", "genres": ["indie rock", "lo-fi", "slacker rock"]},
-    {"name": "Playboi Carti", "spotify_id": "699OTQXzgjhIYAHMy9RyPD", "genres": ["hip hop", "rap", "trap"]},
-    {"name": "Dua Lipa", "spotify_id": "6M2wZ9GZgrQXHCFfjv46we", "genres": ["pop", "dance pop", "uk pop"]},
-    {"name": "Travis Scott", "spotify_id": "0Y5tJX1MQlPlqiwlOH1tJY", "genres": ["hip hop", "rap", "trap"]},
-    {"name": "Phoebe Bridgers", "spotify_id": "1r1uxoy19fzMxunt3ONAkG", "genres": ["indie rock", "indie folk", "singer-songwriter"]},
-    {"name": "Daniel Caesar", "spotify_id": "20wkVLutqVOYrc0kxFs7rA", "genres": ["r&b", "canadian r&b", "neo soul"]},
-    {"name": "Lana Del Rey", "spotify_id": "00FQb4jTyendYWaN8pK0wa", "genres": ["art pop", "indie pop", "baroque pop"]},
-    {"name": "Bad Bunny", "spotify_id": "4q3ewBCX7sLwd24euuV69X", "genres": ["reggaeton", "latin trap", "latin pop"]},
-    {"name": "Mitski", "spotify_id": "2uYWgrBGLiGKrpDbBDM2Pr", "genres": ["indie rock", "art pop", "indie pop"]},
+    {"name": "Kirk Franklin",         "spotify_id": "2hGh5DVzdDMEkGiqnzYuNP", "genres": ["gospel", "urban gospel", "contemporary gospel"],       "image_url": "https://i.pravatar.cc/150?u=kirkfranklin"},
+    {"name": "Tasha Cobbs Leonard",   "spotify_id": "7oPgCQqMMXEXrNau5vxYZP", "genres": ["gospel", "contemporary gospel", "praise and worship"],  "image_url": "https://i.pravatar.cc/150?u=tashacobbs"},
+    {"name": "Travis Greene",         "spotify_id": "1HEvB0GRgBDMTU3oHbJXVA", "genres": ["gospel", "contemporary gospel", "praise and worship"],  "image_url": "https://i.pravatar.cc/150?u=travisgreene"},
+    {"name": "Maverick City Music",   "spotify_id": "5K4W6rqBFWDnAN6FQUkS6x", "genres": ["gospel", "contemporary worship", "ccm"],               "image_url": "https://i.pravatar.cc/150?u=maverickcity"},
+    {"name": "Elevation Worship",     "spotify_id": "6l4IkSGBVB3RxgxPNSCBm0", "genres": ["contemporary worship", "ccm", "praise and worship"],   "image_url": "https://i.pravatar.cc/150?u=elevationworship"},
+    {"name": "Hillsong Worship",      "spotify_id": "55jKRr1LhRGDhzJNRmCgjq", "genres": ["contemporary worship", "ccm", "praise and worship"],   "image_url": "https://i.pravatar.cc/150?u=hillsongworship"},
+    {"name": "Hillsong United",       "spotify_id": "6Ap4Uz1ur6vDqzl0KBLGPL", "genres": ["contemporary worship", "ccm", "praise and worship"],   "image_url": "https://i.pravatar.cc/150?u=hillsongunited"},
+    {"name": "CeCe Winans",           "spotify_id": "2kkuP6gVHBvbJIonjJGvnJ", "genres": ["gospel", "traditional gospel", "contemporary gospel"], "image_url": "https://i.pravatar.cc/150?u=cecewinans"},
+    {"name": "Donnie McClurkin",      "spotify_id": "0YrxMnMvR1jFsv0AxoRnAS", "genres": ["gospel", "traditional gospel", "urban gospel"],        "image_url": "https://i.pravatar.cc/150?u=donniemcclurkin"},
+    {"name": "Fred Hammond",          "spotify_id": "48OEcGpnWWLCVGHToQk9lK", "genres": ["gospel", "urban gospel", "traditional gospel"],        "image_url": "https://i.pravatar.cc/150?u=fredhammond"},
+    {"name": "Yolanda Adams",         "spotify_id": "0KSb7YvdSrGjhXGmkiELd7", "genres": ["gospel", "contemporary gospel", "urban gospel"],       "image_url": "https://i.pravatar.cc/150?u=yolandaadams"},
+    {"name": "Jonathan McReynolds",   "spotify_id": "4EiDKEbKSMSBONsRBdCssP", "genres": ["gospel", "contemporary gospel", "urban gospel"],       "image_url": "https://i.pravatar.cc/150?u=jonathanmcreynolds"},
+    {"name": "Chandler Moore",        "spotify_id": "6VuMaDnrHyPlt7yPLFVAZI", "genres": ["gospel", "contemporary worship", "ccm"],               "image_url": "https://i.pravatar.cc/150?u=chandlermoore"},
+    {"name": "Sinach",                "spotify_id": "0kqnO5pI78JOiHXUoI1JGM", "genres": ["gospel", "african gospel", "praise and worship"],      "image_url": "https://i.pravatar.cc/150?u=sinach"},
+    {"name": "Dunsin Oyekan",         "spotify_id": "5g7JkGFZjBGUqSEBnnlCaF", "genres": ["gospel", "african gospel", "nigerian gospel"],         "image_url": "https://i.pravatar.cc/150?u=dunsinoyekan"},
+    {"name": "Theophilus Sunday",     "spotify_id": "6TIYQ3jFPwQSRmorE2soZN", "genres": ["gospel", "nigerian gospel", "african gospel"],         "image_url": "https://i.pravatar.cc/150?u=theophilussunday"},
+    {"name": "Phil Thompson",         "spotify_id": "5rVpDTR5n2dRdxAnOiOaU5", "genres": ["gospel", "contemporary gospel", "urban gospel"],       "image_url": "https://i.pravatar.cc/150?u=philthompson"},
+    {"name": "Dante Bowe",            "spotify_id": "2RdwBSPQiwcmiDo9sly8ds", "genres": ["gospel", "contemporary worship", "ccm"],               "image_url": "https://i.pravatar.cc/150?u=dantebowe"},
+    {"name": "Lauren Daigle",         "spotify_id": "5zzMfACEjzuAFdQAoE4UJQ", "genres": ["contemporary christian", "ccm", "pop gospel"],         "image_url": "https://i.pravatar.cc/150?u=laurendaigle"},
+    {"name": "Cory Asbury",           "spotify_id": "5m8H0EqlboTEkFdFcCQieP", "genres": ["contemporary worship", "ccm", "praise and worship"],   "image_url": "https://i.pravatar.cc/150?u=coryasbury"},
 ]
 
 MOCK_TRACKS_POOL = [
-    {"name": "Do I Wanna Know?", "artist": "Arctic Monkeys", "album": "AM", "spotify_id": "m1"},
-    {"name": "The Less I Know The Better", "artist": "Tame Impala", "album": "Currents", "spotify_id": "m2"},
-    {"name": "HUMBLE.", "artist": "Kendrick Lamar", "album": "DAMN.", "spotify_id": "m3"},
-    {"name": "Say So", "artist": "Doja Cat", "album": "Hot Pink", "spotify_id": "m4"},
-    {"name": "Blinding Lights", "artist": "The Weeknd", "album": "After Hours", "spotify_id": "m5"},
-    {"name": "EARFQUAKE", "artist": "Tyler, The Creator", "album": "IGOR", "spotify_id": "m6"},
-    {"name": "Nights", "artist": "Frank Ocean", "album": "Blonde", "spotify_id": "m7"},
-    {"name": "Kill Bill", "artist": "SZA", "album": "SOS", "spotify_id": "m8"},
-    {"name": "Creep", "artist": "Radiohead", "album": "Pablo Honey", "spotify_id": "m9"},
-    {"name": "Bad Habit", "artist": "Steve Lacy", "album": "Gemini Rights", "spotify_id": "m10"},
-    {"name": "lovely", "artist": "Billie Eilish", "album": "WHEN WE ALL FALL ASLEEP", "spotify_id": "m11"},
-    {"name": "Chamber of Reflection", "artist": "Mac DeMarco", "album": "Salad Days", "spotify_id": "m12"},
-    {"name": "Magnolia", "artist": "Playboi Carti", "album": "Playboi Carti", "spotify_id": "m13"},
-    {"name": "Levitating", "artist": "Dua Lipa", "album": "Future Nostalgia", "spotify_id": "m14"},
-    {"name": "SICKO MODE", "artist": "Travis Scott", "album": "Astroworld", "spotify_id": "m15"},
+    {"name": "Way Maker",                "artist": "Sinach",              "album": "Way Maker",           "spotify_id": "g1"},
+    {"name": "The Blessing",             "artist": "Elevation Worship",   "album": "Graves Into Gardens", "spotify_id": "g2"},
+    {"name": "Goodness of God",          "artist": "CeCe Winans",         "album": "Believe For It",      "spotify_id": "g3"},
+    {"name": "What A Beautiful Name",    "artist": "Hillsong Worship",    "album": "Let There Be Light",  "spotify_id": "g4"},
+    {"name": "Joyful",                   "artist": "Dante Bowe",          "album": "Circles",             "spotify_id": "g5"},
+    {"name": "Reckless Love",            "artist": "Cory Asbury",         "album": "Reckless Love",       "spotify_id": "g6"},
+    {"name": "Do It Again",              "artist": "Elevation Worship",   "album": "There Is a Cloud",    "spotify_id": "g7"},
+    {"name": "Oceans",                   "artist": "Hillsong United",     "album": "Zion",                "spotify_id": "g8"},
+    {"name": "Never Lost",               "artist": "Elevation Worship",   "album": "Graves Into Gardens", "spotify_id": "g9"},
+    {"name": "You Know My Name",         "artist": "Tasha Cobbs Leonard", "album": "Heart. Passion. Pursuit.", "spotify_id": "g10"},
+    {"name": "Jireh",                    "artist": "Maverick City Music", "album": "Jubilee: Juneteenth Edition", "spotify_id": "g11"},
+    {"name": "Made a Way",               "artist": "Travis Greene",       "album": "Stretching Out",      "spotify_id": "g12"},
+    {"name": "Holy Forever",             "artist": "Bethel Music",        "album": "Revival's In The Air","spotify_id": "g13"},
+    {"name": "Talking to Jesus",         "artist": "Elevation Worship",   "album": "Lion",                "spotify_id": "g14"},
+    {"name": "Fear Is Not My Future",    "artist": "Kirk Franklin",       "album": "Father's Day",        "spotify_id": "g15"},
 ]
 
 
@@ -63,7 +63,7 @@ def generate_mock_profile(user_id: int) -> dict:
     num_artists = rng.randint(8, 15)
     artists = rng.sample(MOCK_ARTISTS_POOL, min(num_artists, len(MOCK_ARTISTS_POOL)))
     top_artists = [
-        {**a, "image_url": None, "rank": i + 1}
+        {**a, "rank": i + 1}  # image_url comes from MOCK_ARTISTS_POOL entry
         for i, a in enumerate(artists)
     ]
 

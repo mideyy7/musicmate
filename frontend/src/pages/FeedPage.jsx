@@ -3,32 +3,34 @@ import { getCampusPulse } from '../services/api';
 import NavBar from '../components/NavBar';
 import TrackActions from '../components/TrackActions';
 
-// Mock fallback data matching screenshots
+// Mock fallback data — gospel theme
 const MOCK_DATA = {
   campus_top_50: [
-    { rank: 1, song_name: '505', artist: 'Arctic Monkeys', likes: 42, spotify_id: '0BxE4FqsDD1Ot4YuBXwAPp', spotify_url: 'https://open.spotify.com/track/0BxE4FqsDD1Ot4YuBXwAPp' },
-    { rank: 2, song_name: 'Blinding Lights', artist: 'The Weeknd', likes: 38, spotify_id: '0VjIjW4GlUZAMYd2vXMi4', spotify_url: 'https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi4' },
-    { rank: 3, song_name: 'The Less I Know The Better', artist: 'Tame Impala', likes: 31, spotify_id: '6K4t31amVTZDgR3sKmwUJJ', spotify_url: 'https://open.spotify.com/track/6K4t31amVTZDgR3sKmwUJJ' },
-    { rank: 4, song_name: 'Pink + White', artist: 'Frank Ocean', likes: 24, spotify_id: '3xKsf9qdS1CyvXSMEid6g8', spotify_url: 'https://open.spotify.com/track/3xKsf9qdS1CyvXSMEid6g8' },
-    { rank: 5, song_name: 'As It Was', artist: 'Harry Styles', likes: 19, spotify_id: '4LRPiXqCikLlN15c3yImP7', spotify_url: 'https://open.spotify.com/track/4LRPiXqCikLlN15c3yImP7' },
+    { rank: 1, song_name: 'Way Maker',            artist: 'Sinach',              likes: 42, spotify_id: '6y0igZArWVi6Iz0rj35c1Y', spotify_url: 'https://open.spotify.com/search/Way%20Maker%20Sinach' },
+    { rank: 2, song_name: 'The Blessing',          artist: 'Elevation Worship',   likes: 38, spotify_id: '3Blp2bAlBcxp8CBPF0T8W7', spotify_url: 'https://open.spotify.com/search/The%20Blessing%20Elevation%20Worship' },
+    { rank: 3, song_name: 'Goodness of God',       artist: 'CeCe Winans',         likes: 31, spotify_id: '1xR3kzx9OHTQP6UPKfSQfz', spotify_url: 'https://open.spotify.com/search/Goodness%20of%20God%20CeCe%20Winans' },
+    { rank: 4, song_name: 'What A Beautiful Name', artist: 'Hillsong Worship',    likes: 24, spotify_id: '0BjC1NfoEOOusryehmNe5R', spotify_url: 'https://open.spotify.com/search/What%20A%20Beautiful%20Name%20Hillsong' },
+    { rank: 5, song_name: 'Joyful',                artist: 'Dante Bowe',          likes: 19, spotify_id: '0MoSqJpK8mglxq5W7YsJmj', spotify_url: 'https://open.spotify.com/search/Joyful%20Dante%20Bowe' },
   ],
   friend_favorites: [
-    { user_id: 1, display_name: 'Emma', song_name: '505', artist: 'Arctic Monkeys', profile_picture: 'https://i.pravatar.cc/300?img=5', spotify_id: '0BxE4FqsDD1Ot4YuBXwAPp', spotify_url: 'https://open.spotify.com/track/0BxE4FqsDD1Ot4YuBXwAPp' },
-    { user_id: 2, display_name: 'James', song_name: 'Blinding Lights', artist: 'The Weeknd', profile_picture: 'https://i.pravatar.cc/300?img=33', spotify_id: '0VjIjW4GlUZAMYd2vXMi4', spotify_url: 'https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi4' },
-    { user_id: 3, display_name: 'Sophie', song_name: 'The Less I Know The Better', artist: 'Tame Impala', profile_picture: 'https://i.pravatar.cc/300?img=9', spotify_id: '6K4t31amVTZDgR3sKmwUJJ', spotify_url: 'https://open.spotify.com/track/6K4t31amVTZDgR3sKmwUJJ' },
+    { user_id: 1, display_name: 'Adaeze', song_name: 'Way Maker',       artist: 'Sinach',            profile_picture: 'https://randomuser.me/api/portraits/women/1.jpg', spotify_id: '6y0igZArWVi6Iz0rj35c1Y', spotify_url: 'https://open.spotify.com/search/Way%20Maker%20Sinach' },
+    { user_id: 2, display_name: 'Joshua', song_name: 'The Blessing',    artist: 'Elevation Worship', profile_picture: 'https://randomuser.me/api/portraits/men/3.jpg',   spotify_id: '3Blp2bAlBcxp8CBPF0T8W7', spotify_url: 'https://open.spotify.com/search/The%20Blessing%20Elevation%20Worship' },
+    { user_id: 3, display_name: 'Grace',  song_name: 'Goodness of God', artist: 'CeCe Winans',       profile_picture: 'https://randomuser.me/api/portraits/women/5.jpg', spotify_id: '1xR3kzx9OHTQP6UPKfSQfz', spotify_url: 'https://open.spotify.com/search/Goodness%20of%20God%20CeCe%20Winans' },
   ],
   campus_icons: [
-    { name: 'Theophilus Sunday', image_url: null, count: 18 },
-    { name: 'Michael Smith', image_url: null, count: 14 },
-    { name: 'Don Moen', image_url: null, count: 12 },
-    { name: 'Minister GUC', image_url: null, count: 9 },
+    { name: 'Elevation Worship',   image_url: 'https://i.pravatar.cc/150?u=elevationworship', count: 18 },
+    { name: 'Kirk Franklin',       image_url: 'https://i.pravatar.cc/150?u=kirkfranklin',     count: 15 },
+    { name: 'Maverick City Music', image_url: 'https://i.pravatar.cc/150?u=maverickcity',     count: 13 },
+    { name: 'Hillsong Worship',    image_url: 'https://i.pravatar.cc/150?u=hillsongworship',  count: 11 },
+    { name: 'Tasha Cobbs Leonard', image_url: 'https://i.pravatar.cc/150?u=tashacobbs',       count: 9  },
+    { name: 'Sinach',              image_url: 'https://i.pravatar.cc/150?u=sinach',           count: 7  },
   ],
   genre_pulse: [
-    { genre: 'Gospel', percentage: 45 },
-    { genre: 'Hip Hop', percentage: 30 },
-    { genre: 'Electronic', percentage: 10 },
-    { genre: 'R&B', percentage: 8 },
-    { genre: 'Pop', percentage: 7 },
+    { genre: 'Gospel',               percentage: 40 },
+    { genre: 'Contemporary Worship', percentage: 28 },
+    { genre: 'Urban Gospel',         percentage: 16 },
+    { genre: 'African Gospel',       percentage: 10 },
+    { genre: 'Traditional Gospel',   percentage: 6  },
   ],
 };
 
