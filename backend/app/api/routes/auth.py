@@ -25,6 +25,8 @@ from app.services.auth import (
     verify_password,
 )
 from app.services.cas import generate_cas_url, verify_and_consume
+from app.services.spotify import is_mock_mode
+from app.services.demo_seed import seed_demo_users
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -68,9 +70,19 @@ def cas_complete(request: CASCompleteRequest, db: Session = Depends(get_db)):
 
     if existing_user:
         access_token = create_access_token(data={"sub": str(existing_user.id)})
+        if is_mock_mode():
+            try:
+                seed_demo_users(db, existing_user.id)
+            except Exception:
+                pass
         return CASTokenResponse(access_token=access_token, is_new_user=False)
 
     user = create_cas_user(db, email=email, display_name=request.fullname)
+    if is_mock_mode():
+        try:
+            seed_demo_users(db, user.id)
+        except Exception:
+            pass
     access_token = create_access_token(data={"sub": str(user.id)})
     return CASTokenResponse(access_token=access_token, is_new_user=True)
 
@@ -126,6 +138,12 @@ def sso_complete(request: SSOCompleteRequest, db: Session = Depends(get_db)):
         show_faculty=request.show_faculty,
     )
 
+    if is_mock_mode():
+        try:
+            seed_demo_users(db, user.id)
+        except Exception:
+            pass
+
     access_token = create_access_token(data={"sub": str(user.id)})
     return Token(access_token=access_token)
 
@@ -139,6 +157,11 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password.",
         )
+    if is_mock_mode():
+        try:
+            seed_demo_users(db, user.id)
+        except Exception:
+            pass
     access_token = create_access_token(data={"sub": str(user.id)})
     return Token(access_token=access_token)
 

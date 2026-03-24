@@ -13,22 +13,23 @@ export default function SpotifyCallbackPage() {
     const errorParam = searchParams.get('error');
 
     if (errorParam) {
-      setError('Spotify authorization was denied.');
+      setTimeout(() => setError('Spotify authorization was denied.'), 300);
       return;
     }
 
     if (!code) {
-      setError('No authorization code received from Spotify.');
+      setTimeout(() => setError('No authorization code received from Spotify.'), 300);
       return;
     }
 
     async function handleCallback() {
       try {
+        setStatus('Connecting to Spotify...');
         await spotifyCallback(code);
         setStatus('Syncing your music data...');
         await syncSpotifyProfile();
-        setStatus('Done! Redirecting...');
-        navigate('/', { replace: true });
+        setStatus('All done! Redirecting...');
+        setTimeout(() => navigate('/', { replace: true }), 400);
       } catch (err) {
         setError(err.message);
       }

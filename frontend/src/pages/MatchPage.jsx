@@ -14,7 +14,7 @@ export default function MatchPage() {
     loadFeed();
   }, []);
 
-  async function loadFeed(filters = {}) {
+  async function loadFeed(filters = {}, retries = 2) {
     setLoading(true);
     setError('');
     try {
@@ -22,6 +22,11 @@ export default function MatchPage() {
       setCandidates(data);
       setCurrentIndex(0);
     } catch (err) {
+      // If profile isn't ready yet, retry once after a short delay
+      if (err.message?.includes('sync your music profile') && retries > 0) {
+        setTimeout(() => loadFeed(filters, retries - 1), 1500);
+        return;
+      }
       setError(err.message);
     } finally {
       setLoading(false);
@@ -68,7 +73,7 @@ export default function MatchPage() {
     <div className="page-container">
       <NavBar />
       <div className="match-page">
-        {error && (
+        {error && !error.includes('sync your music profile') && (
           <div className="error-message" style={{ position: 'absolute', top: '80px', left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
             {error}
           </div>
