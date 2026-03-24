@@ -6,30 +6,39 @@ Flow:
   1. generate_cas_url()  → frontend redirects user to CAS
   2. CAS redirects user back to callback URL with ?username=&fullname=
   3. verify_and_consume() → backend confirms ticket with CAS server-to-server
+
+Tickets are stored in the database so they survive server restarts (Render free tier
+spins down after inactivity, which would clear any in-memory store).
 """
 
 import secrets
-import time
 import urllib.parse
+from datetime import datetime, timedelta
 
 import httpx
+from sqlalchemy.orm import Session
+
+from app.models.cas_ticket import CASTicket
 
 CAS_BASE = "https://studentnet.cs.manchester.ac.uk/authenticate/"
-
-# In-memory store: csticket -> (callback_url, expiry_timestamp)
-# Tickets are single-use and expire after 5 minutes.
-_pending_tickets: dict[str, tuple[str, float]] = {}
 
 TICKET_TTL_SECONDS = 300  # 5 minutes
 
 
-def generate_cas_url(callback_url: str) -> tuple[str, str]:
+def generate_cas_url(db: Session, callback_url: str) -> tuple[str, str]:
     """
-    Generate a one-time csticket and build the CAS redirect URL.
+    Generate a one-time csticket, persist it to the DB, and build the CAS redirect URL.
     Returns (cas_redirect_url, csticket).
     """
     csticket = secrets.token_hex(16)
-    _pending_tickets[csticket] = (callback_url, time.time() + TICKET_TTL_SECONDS)
+    expires_at = datetime.utcnow() + timedelta(seconds=TICKET_TTL_SECONDS)
+
+    # Clean up expired tickets while we're here
+    db.query(CASTicket).filter(CASTicket.expires_at < datetime.utcnow()).delete()
+
+    ticket = CASTicket(csticket=csticket, callback_url=callback_url, expires_at=expires_at)
+    db.add(ticket)
+    db.commit()
 
     params = urllib.parse.urlencode({
         "url": callback_url,
@@ -40,18 +49,23 @@ def generate_cas_url(callback_url: str) -> tuple[str, str]:
     return f"{CAS_BASE}?{params}", csticket
 
 
-def verify_and_consume(csticket: str, username: str, fullname: str) -> bool:
+def verify_and_consume(db: Session, csticket: str, username: str, fullname: str) -> bool:
     """
     Verify a CAS ticket with the UoM CAS server and consume it (one-time use).
     Returns True if CAS confirms the authentication is valid.
     """
-    # Pop ticket from store (consume regardless of outcome to prevent replay)
-    entry = _pending_tickets.pop(csticket, None)
-    if entry is None:
+    ticket = db.query(CASTicket).filter(CASTicket.csticket == csticket).first()
+    if ticket is None:
         return False
 
-    callback_url, expiry = entry
-    if time.time() > expiry:
+    callback_url = ticket.callback_url
+    expired = ticket.expires_at < datetime.utcnow()
+
+    # Consume the ticket regardless of outcome (prevent replay attacks)
+    db.delete(ticket)
+    db.commit()
+
+    if expired:
         return False
 
     # Server-to-server confirmation with UoM CAS

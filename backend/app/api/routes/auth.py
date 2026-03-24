@@ -32,14 +32,17 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 @router.get("/cas/initiate", response_model=CASInitiateResponse)
-def cas_initiate(callback_url: str = "http://localhost:5173/cas/callback"):
+def cas_initiate(
+    callback_url: str = "http://localhost:5173/cas/callback",
+    db: Session = Depends(get_db),
+):
     """
     Start the UoM CAS login flow.
     Returns a CAS redirect URL and a one-time csticket.
     The frontend should store the csticket, then redirect the user to cas_url.
     CAS will redirect back to callback_url with ?username=&fullname= query params.
     """
-    cas_url, csticket = generate_cas_url(callback_url)
+    cas_url, csticket = generate_cas_url(db, callback_url)
     return CASInitiateResponse(cas_url=cas_url, csticket=csticket)
 
 
@@ -50,7 +53,7 @@ def cas_complete(request: CASCompleteRequest, db: Session = Depends(get_db)):
     Verifies the csticket with the UoM CAS server, then creates or logs in the user.
     Returns a JWT and whether this is a new account (needs onboarding).
     """
-    verified = verify_and_consume(request.csticket, request.username, request.fullname)
+    verified = verify_and_consume(db, request.csticket, request.username, request.fullname)
     if not verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
