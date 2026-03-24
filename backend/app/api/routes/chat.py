@@ -30,16 +30,16 @@ CONVERSATION_PROMPTS = [
 ]
 
 MOCK_SONG_RESULTS = [
-    {"track_name": "Blinding Lights", "artist": "The Weeknd", "album": "After Hours", "image_url": None, "spotify_url": None, "spotify_id": "0VjIjW4GlUZAMYd2vXMi4"},
-    {"track_name": "Bohemian Rhapsody", "artist": "Queen", "album": "A Night at the Opera", "image_url": None, "spotify_url": None, "spotify_id": "4u7EnebtmKWzUH433cf5Qv"},
-    {"track_name": "Levitating", "artist": "Dua Lipa", "album": "Future Nostalgia", "image_url": None, "spotify_url": None, "spotify_id": "39LLxExYz6ewLAo9BKIMH8"},
-    {"track_name": "Heat Waves", "artist": "Glass Animals", "album": "Dreamland", "image_url": None, "spotify_url": None, "spotify_id": "02MWAaffLxlfxAUY7c5dvx"},
-    {"track_name": "As It Was", "artist": "Harry Styles", "album": "Harry's House", "image_url": None, "spotify_url": None, "spotify_id": "4LRPiXqCikLlN15c3yImP7"},
-    {"track_name": "Pink + White", "artist": "Frank Ocean", "album": "Blonde", "image_url": None, "spotify_url": None, "spotify_id": "3xKsf9qdS1CyvXSMEid6g8"},
-    {"track_name": "505", "artist": "Arctic Monkeys", "album": "Favourite Worst Nightmare", "image_url": None, "spotify_url": None, "spotify_id": "0BxE4FqsDD1Ot4YuBXwAPp"},
-    {"track_name": "Redbone", "artist": "Childish Gambino", "album": "Awaken, My Love!", "image_url": None, "spotify_url": None, "spotify_id": "0wXuerDYIBRqxJGzjEmjY4"},
-    {"track_name": "Electric Feel", "artist": "MGMT", "album": "Oracular Spectacular", "image_url": None, "spotify_url": None, "spotify_id": "3FtYbEfBqAlGO46NUDQSAt"},
-    {"track_name": "Ivy", "artist": "Frank Ocean", "album": "Blonde", "image_url": None, "spotify_url": None, "spotify_id": "2ZWlPOoWh0626oTaHrnl2a"},
+    {"track_name": "Way Maker",             "artist": "Sinach",              "album": "Way Maker",                    "image_url": None, "spotify_url": "https://open.spotify.com/search/Way%20Maker%20Sinach",              "spotify_id": "6y0igZArWVi6Iz0rj35c1Y"},
+    {"track_name": "The Blessing",          "artist": "Elevation Worship",   "album": "Graves Into Gardens",          "image_url": None, "spotify_url": "https://open.spotify.com/search/The%20Blessing%20Elevation%20Worship", "spotify_id": "3Blp2bAlBcxp8CBPF0T8W7"},
+    {"track_name": "Goodness of God",       "artist": "CeCe Winans",         "album": "Believe For It",               "image_url": None, "spotify_url": "https://open.spotify.com/search/Goodness%20of%20God%20CeCe%20Winans",  "spotify_id": "1xR3kzx9OHTQP6UPKfSQfz"},
+    {"track_name": "What A Beautiful Name", "artist": "Hillsong Worship",    "album": "Let There Be Light",           "image_url": None, "spotify_url": "https://open.spotify.com/search/What%20A%20Beautiful%20Name%20Hillsong","spotify_id": "0BjC1NfoEOOusryehmNe5R"},
+    {"track_name": "Joyful",                "artist": "Dante Bowe",          "album": "Circles",                      "image_url": None, "spotify_url": "https://open.spotify.com/search/Joyful%20Dante%20Bowe",               "spotify_id": "0MoSqJpK8mglxq5W7YsJmj"},
+    {"track_name": "Reckless Love",         "artist": "Cory Asbury",         "album": "Reckless Love",                "image_url": None, "spotify_url": "https://open.spotify.com/search/Reckless%20Love%20Cory%20Asbury",     "spotify_id": "1ZiP6JjWZCzFQvKNiOuvAi"},
+    {"track_name": "Do It Again",           "artist": "Elevation Worship",   "album": "There Is a Cloud",             "image_url": None, "spotify_url": "https://open.spotify.com/search/Do%20It%20Again%20Elevation%20Worship","spotify_id": "3Xax7yHUjpC7RPJGU1Y5LD"},
+    {"track_name": "Oceans",                "artist": "Hillsong United",     "album": "Zion",                         "image_url": None, "spotify_url": "https://open.spotify.com/search/Oceans%20Hillsong%20United",           "spotify_id": "3DarAbFujv6eYNliUTyqtz"},
+    {"track_name": "Jireh",                 "artist": "Maverick City Music", "album": "Jubilee: Juneteenth Edition",  "image_url": None, "spotify_url": "https://open.spotify.com/search/Jireh%20Maverick%20City",             "spotify_id": "7oPgCQqMMXEXrNau5vxYZP"},
+    {"track_name": "Fear Is Not My Future", "artist": "Kirk Franklin",       "album": "Father's Day",                 "image_url": None, "spotify_url": "https://open.spotify.com/search/Fear%20Is%20Not%20My%20Future%20Kirk%20Franklin","spotify_id": "2hGh5DVzdDMEkGiqnzYuNP"},
 ]
 
 

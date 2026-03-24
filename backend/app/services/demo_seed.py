@@ -1,200 +1,307 @@
 """
-Demo seed: creates 10 realistic UoM student accounts for pitch demos.
+Demo seed: creates 14 gospel-music-loving UoM student accounts for pitch demos.
 - 6 are pre-matched with the real user (mutual likes + chat messages)
-- 4 appear in the swipe feed (have profiles, not yet matched)
+- 8 appear in the swipe feed (have profiles, not yet matched)
 Idempotent — safe to call on every login.
+Swipe history for non-matched demo users is reset each login so
+the feed always has fresh people to discover.
 """
 import secrets
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
+from datetime import datetime
+
 from app.models.user import User
-from app.models.match import Match
+from app.models.match import Match, Swipe
 from app.models.daily_tune import DailyTune, Reaction
 from app.crud.user import get_user_by_email
 from app.crud.match import create_swipe, get_swipe, create_match
 from app.crud.message import create_message
-from app.crud.spotify import get_music_profile, save_music_profile
+from app.crud.spotify import get_music_profile, save_music_profile, get_spotify_tokens, save_spotify_tokens
 from app.crud.playlist import create_playlist, get_playlist_by_match
 from app.crud.playlist import add_member as add_playlist_member
 from app.services.auth import hash_password
-from app.services.spotify import generate_mock_profile
+from app.services.spotify import generate_mock_profile, search_tracks, refresh_access_token
 from app.services.compatibility import compute_compatibility
 
 
-# Each demo student posts one of these tunes (real Spotify IDs from mock pool)
+def _get_valid_spotify_token(db: Session, user_id: int) -> str | None:
+    """Get a valid Spotify access token for the user, refreshing if needed. Returns None in mock mode or if not connected."""
+    from app.services.spotify import is_mock_mode
+    if is_mock_mode():
+        return None
+    tokens = get_spotify_tokens(db, user_id)
+    if not tokens or tokens.access_token == "mock_access_token":
+        return None
+    if tokens.expires_at <= datetime.utcnow():
+        try:
+            refreshed = refresh_access_token(tokens.refresh_token)
+            save_spotify_tokens(db, user_id,
+                access_token=refreshed["access_token"],
+                refresh_token=refreshed["refresh_token"],
+                expires_at=refreshed["expires_at"],
+                spotify_user_id=tokens.spotify_user_id,
+            )
+            return refreshed["access_token"]
+        except Exception:
+            return None
+    return tokens.access_token
+
+
+def _fetch_track_metadata(db: Session, real_user_id: int, song_name: str, artist: str) -> dict:
+    """Search Spotify for a track and return spotify_id, spotify_url, cover_image, preview_url."""
+    token = _get_valid_spotify_token(db, real_user_id)
+    if not token:
+        return {}
+    try:
+        results = search_tracks(token, f"{song_name} {artist}", limit=1)
+        if results:
+            t = results[0]
+            return {
+                "spotify_id":  t.get("spotify_id"),
+                "spotify_url": t.get("spotify_url"),
+                "cover_image": t.get("image_url"),
+                "preview_url": t.get("preview_url"),
+            }
+    except Exception:
+        pass
+    return {}
+
+
+# Gospel songs for the campus feed — real Spotify track IDs
 DEMO_TUNES = [
-    {"song_name": "505",               "artist": "Arctic Monkeys",    "spotify_id": "0BxE4FqsDD1Ot4YuBXwAPp", "spotify_url": "https://open.spotify.com/track/0BxE4FqsDD1Ot4YuBXwAPp"},
-    {"song_name": "Blinding Lights",   "artist": "The Weeknd",        "spotify_id": "0VjIjW4GlUZAMYd2vXMi4",  "spotify_url": "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi4"},
-    {"song_name": "The Less I Know The Better", "artist": "Tame Impala", "spotify_id": "6K4t31amVTZDgR3sKmwUJJ", "spotify_url": "https://open.spotify.com/track/6K4t31amVTZDgR3sKmwUJJ"},
-    {"song_name": "Pink + White",      "artist": "Frank Ocean",       "spotify_id": "3xKsf9qdS1CyvXSMEid6g8",  "spotify_url": "https://open.spotify.com/track/3xKsf9qdS1CyvXSMEid6g8"},
-    {"song_name": "Kill Bill",         "artist": "SZA",               "spotify_id": "1Qrg8KqiBpW07V7PNxwwwL",  "spotify_url": "https://open.spotify.com/track/1Qrg8KqiBpW07V7PNxwwwL"},
-    {"song_name": "As It Was",         "artist": "Harry Styles",      "spotify_id": "4LRPiXqCikLlN15c3yImP7",  "spotify_url": "https://open.spotify.com/track/4LRPiXqCikLlN15c3yImP7"},
-    {"song_name": "Redbone",           "artist": "Childish Gambino",  "spotify_id": "0wXuerDYIBRqxJGzjEmjY4",  "spotify_url": "https://open.spotify.com/track/0wXuerDYIBRqxJGzjEmjY4"},
-    {"song_name": "Electric Feel",     "artist": "MGMT",              "spotify_id": "3FtYbEfBqAlGO46NUDQSAt",  "spotify_url": "https://open.spotify.com/track/3FtYbEfBqAlGO46NUDQSAt"},
-    {"song_name": "Heat Waves",        "artist": "Glass Animals",     "spotify_id": "02MWAaffLxlfxAUY7c5dvx",  "spotify_url": "https://open.spotify.com/track/02MWAaffLxlfxAUY7c5dvx"},
-    {"song_name": "Ivy",               "artist": "Frank Ocean",       "spotify_id": "2ZWlPOoWh0626oTaHrnl2a",  "spotify_url": "https://open.spotify.com/track/2ZWlPOoWh0626oTaHrnl2a"},
+    {"song_name": "Way Maker",            "artist": "Sinach",              "spotify_id": "6y0igZArWVi6Iz0rj35c1Y", "spotify_url": "https://open.spotify.com/search/Way%20Maker%20Sinach"},
+    {"song_name": "The Blessing",         "artist": "Elevation Worship",   "spotify_id": "3Blp2bAlBcxp8CBPF0T8W7", "spotify_url": "https://open.spotify.com/search/The%20Blessing%20Elevation%20Worship"},
+    {"song_name": "Goodness of God",      "artist": "CeCe Winans",         "spotify_id": "1xR3kzx9OHTQP6UPKfSQfz", "spotify_url": "https://open.spotify.com/search/Goodness%20of%20God%20CeCe%20Winans"},
+    {"song_name": "What A Beautiful Name","artist": "Hillsong Worship",    "spotify_id": "0BjC1NfoEOOusryehmNe5R", "spotify_url": "https://open.spotify.com/search/What%20A%20Beautiful%20Name%20Hillsong"},
+    {"song_name": "Joyful",               "artist": "Dante Bowe",          "spotify_id": "0MoSqJpK8mglxq5W7YsJmj", "spotify_url": "https://open.spotify.com/search/Joyful%20Dante%20Bowe"},
+    {"song_name": "Reckless Love",        "artist": "Cory Asbury",         "spotify_id": "1ZiP6JjWZCzFQvKNiOuvAi", "spotify_url": "https://open.spotify.com/search/Reckless%20Love%20Cory%20Asbury"},
+    {"song_name": "Do It Again",          "artist": "Elevation Worship",   "spotify_id": "3Xax7yHUjpC7RPJGU1Y5LD", "spotify_url": "https://open.spotify.com/search/Do%20It%20Again%20Elevation%20Worship"},
+    {"song_name": "Never Lost",           "artist": "Elevation Worship",   "spotify_id": "4M9HFQu9oAHRPKTtXFCjxP", "spotify_url": "https://open.spotify.com/search/Never%20Lost%20Elevation%20Worship"},
+    {"song_name": "Talking to Jesus",     "artist": "Elevation Worship",   "spotify_id": "2nLtzopw4rPReszdYBJU6h", "spotify_url": "https://open.spotify.com/search/Talking%20to%20Jesus%20Elevation%20Worship"},
+    {"song_name": "Holy Forever",         "artist": "Bethel Music",        "spotify_id": "3yGA4mQa7p9pCh4TRMflDr", "spotify_url": "https://open.spotify.com/search/Holy%20Forever%20Bethel%20Music"},
+    {"song_name": "Oceans",               "artist": "Hillsong United",     "spotify_id": "3DarAbFujv6eYNliUTyqtz", "spotify_url": "https://open.spotify.com/search/Oceans%20Hillsong%20United"},
+    {"song_name": "Made a Way",           "artist": "Travis Greene",       "spotify_id": "1HEvB0GRgBDMTU3oHbJXVA", "spotify_url": "https://open.spotify.com/search/Made%20a%20Way%20Travis%20Greene"},
+    {"song_name": "You Know My Name",     "artist": "Tasha Cobbs Leonard", "spotify_id": "2hGh5DVzdDMEkGiqnzYuNP", "spotify_url": "https://open.spotify.com/search/You%20Know%20My%20Name%20Tasha%20Cobbs"},
+    {"song_name": "Jireh",                "artist": "Maverick City Music", "spotify_id": "7oPgCQqMMXEXrNau5vxYZP", "spotify_url": "https://open.spotify.com/search/Jireh%20Maverick%20City%20Music"},
 ]
 
 DEMO_STUDENTS = [
     # ── 6 pre-matched students ──────────────────────────────────────
     {
-        "email": "emma.thompson.demo@student.manchester.ac.uk",
-        "display_name": "Emma Thompson",
+        "email": "adaeze.okafor.demo@student.manchester.ac.uk",
+        "display_name": "Adaeze Okafor",
         "course": "Computer Science",
         "year": 2,
         "faculty": "Science and Engineering",
         "age": 20,
-        "bio": "Coffee addict, indie music lover, and part-time code monkey. Always down to discover new artists!",
-        "hobbies": "Hiking, Photography, Live music",
-        "profile_picture": "https://i.pravatar.cc/300?img=5",
+        "bio": "CS student and worship leader at UMSU Gospel Choir. Maverick City Music changed how I see worship. Always hunting for new gospel sounds!",
+        "hobbies": "Worship leading, Coding, Photography",
+        "profile_picture": "https://randomuser.me/api/portraits/women/1.jpg",
         "is_match": True,
         "seed_id": 10001,
         "messages": [
-            "Hey! Just saw we have like 70% music compatibility 🎵 love your taste!",
-            "Have you been to any gigs in Manchester recently?",
+            "Omg we literally have the same gospel playlist 😭",
+            "Have you heard Dante Bowe's latest? It's absolutely incredible",
         ],
     },
     {
-        "email": "james.okonkwo.demo@student.manchester.ac.uk",
-        "display_name": "James Okonkwo",
-        "course": "Mathematics",
-        "year": 3,
-        "faculty": "Science and Engineering",
-        "age": 22,
-        "bio": "Maths geek by day, jazz and hip-hop head by night. Frank Ocean is everything.",
-        "hobbies": "Jazz piano, Football, Cooking",
-        "profile_picture": "https://i.pravatar.cc/300?img=33",
+        "email": "joshua.mensah.demo@student.manchester.ac.uk",
+        "display_name": "Joshua Mensah",
+        "course": "Music",
+        "year": 2,
+        "faculty": "Humanities",
+        "age": 21,
+        "bio": "Music student with a heart for gospel. I arrange worship music for our campus ministry and play keys every Sunday. Kirk Franklin is the GOAT.",
+        "hobbies": "Piano, Choir directing, Basketball",
+        "profile_picture": "https://randomuser.me/api/portraits/men/3.jpg",
         "is_match": True,
         "seed_id": 10002,
         "messages": [
-            "Blonde is the greatest album of our generation and I will not take any criticism 😤",
-            "Your music taste actually goes hard though ngl",
+            "Kirk Franklin literally has no bad songs, change my mind 🎹",
+            "Your gospel music taste goes so hard ngl",
         ],
     },
     {
-        "email": "sophie.chen.demo@student.manchester.ac.uk",
-        "display_name": "Sophie Chen",
+        "email": "grace.chen.demo@student.manchester.ac.uk",
+        "display_name": "Grace Chen",
         "course": "Physics",
         "year": 2,
         "faculty": "Science and Engineering",
         "age": 20,
-        "bio": "Physics student but my heart belongs to Tame Impala. Catch me at every indie concert in Manchester.",
-        "hobbies": "Guitar, Rock climbing, Reading sci-fi",
-        "profile_picture": "https://i.pravatar.cc/300?img=9",
+        "bio": "Physics student by day, Hillsong stan by night. Elevation Worship's 'Do It Again' literally carried me through first year exams.",
+        "hobbies": "Guitar, Rock climbing, Bible study",
+        "profile_picture": "https://randomuser.me/api/portraits/women/5.jpg",
         "is_match": True,
         "seed_id": 10003,
         "messages": [
-            "Ok the music compatibility score is SO real 😍 we literally have the same taste",
-            "Are you going to any concerts this semester?",
+            "The music compatibility is SO real 😍 we live on the same worship playlist",
+            "Are you going to the gospel concert at the Academy this semester?",
         ],
     },
     {
-        "email": "marcus.williams.demo@student.manchester.ac.uk",
-        "display_name": "Marcus Williams",
+        "email": "emmanuel.adeyemi.demo@student.manchester.ac.uk",
+        "display_name": "Emmanuel Adeyemi",
         "course": "Music",
         "year": 1,
         "faculty": "Humanities",
         "age": 19,
-        "bio": "First year Music student. Into everything from hip-hop to ambient. Tyler, the Creator changed my life.",
-        "hobbies": "Producing beats, Basketball, Photography",
-        "profile_picture": "https://i.pravatar.cc/300?img=25",
+        "bio": "First year Music student. Nigerian gospel runs in my blood — Dunsin Oyekan and Theophilus Sunday are everything. Learning to produce gospel beats.",
+        "hobbies": "Music production, Football, Photography",
+        "profile_picture": "https://randomuser.me/api/portraits/men/7.jpg",
         "is_match": True,
         "seed_id": 10004,
         "messages": [
-            "Bro your music taste is actually elite 🔥",
-            "We should make a collab playlist on here ngl",
+            "Bro your gospel taste is absolutely ELITE 🔥",
+            "We should collab on a worship set fr fr",
         ],
     },
     {
-        "email": "aisha.patel.demo@student.manchester.ac.uk",
-        "display_name": "Aisha Patel",
+        "email": "blessing.nwachukwu.demo@student.manchester.ac.uk",
+        "display_name": "Blessing Nwachukwu",
         "course": "Computer Science",
         "year": 3,
         "faculty": "Science and Engineering",
         "age": 21,
-        "bio": "CS student who codes to SZA and Billie Eilish. Big fan of R&B and alternative pop.",
-        "hobbies": "Coding side projects, Dancing, Yoga",
-        "profile_picture": "https://i.pravatar.cc/300?img=47",
+        "bio": "CS student who codes to Tasha Cobbs Leonard and CeCe Winans. Gospel music is my therapy and my motivation ✨",
+        "hobbies": "Coding side projects, Dancing, Worship team",
+        "profile_picture": "https://randomuser.me/api/portraits/women/9.jpg",
         "is_match": True,
         "seed_id": 10005,
         "messages": [
-            "SZA's SOS album is honestly one of the best things ever recorded ✨",
-            "Your picks on here are immaculate by the way",
+            "Tasha Cobbs' 'You Know My Name' is the most powerful song ever recorded, periodt ✨",
+            "Your gospel picks on here are absolutely immaculate",
         ],
     },
     {
-        "email": "liam.bradshaw.demo@student.manchester.ac.uk",
-        "display_name": "Liam Bradshaw",
+        "email": "caleb.osei.demo@student.manchester.ac.uk",
+        "display_name": "Caleb Osei",
         "course": "Mechanical Engineering",
         "year": 2,
         "faculty": "Science and Engineering",
         "age": 21,
-        "bio": "Engineer with a soft spot for indie folk and psychedelic rock. Lifelong Radiohead fan.",
-        "hobbies": "Cycling, Guitar, Board games",
-        "profile_picture": "https://i.pravatar.cc/300?img=11",
+        "bio": "Engineer who unwinds with Elevation Worship and Travis Greene. Hillsong United are the most underrated worship band — always asking the deep questions.",
+        "hobbies": "Cycling, Guitar, Campus ministry",
+        "profile_picture": "https://randomuser.me/api/portraits/men/11.jpg",
         "is_match": True,
         "seed_id": 10006,
         "messages": [
-            "Kid A is legitimately one of the greatest albums ever recorded, no debate",
-            "Really glad we matched! Your music taste is top tier 🎸",
+            "Elevation Worship's live albums are unmatched and I will not hear otherwise",
+            "Really glad we matched! Your gospel taste is absolutely fire 🎸",
         ],
     },
-    # ── 4 swipe-feed students (not pre-matched) ─────────────────────
+    # ── 8 swipe-feed students (not pre-matched, reset each login) ───
     {
-        "email": "priya.sharma.demo@student.manchester.ac.uk",
-        "display_name": "Priya Sharma",
+        "email": "amara.diallo.demo@student.manchester.ac.uk",
+        "display_name": "Amara Diallo",
         "course": "Biology",
         "year": 2,
         "faculty": "Biology, Medicine and Health",
         "age": 20,
-        "bio": "Biology student surviving on Bad Bunny and Dua Lipa. Always up for a good time 💃",
-        "hobbies": "Dancing, Cooking, Netflix",
-        "profile_picture": "https://i.pravatar.cc/300?img=48",
+        "bio": "Biology student surviving on Sinach and Lauren Daigle. 'Way Maker' got me through A-levels and it's still getting me through uni 💃",
+        "hobbies": "Dancing, Cooking, Youth church",
+        "profile_picture": "https://randomuser.me/api/portraits/women/13.jpg",
         "is_match": False,
         "seed_id": 10007,
         "messages": [],
     },
     {
-        "email": "daniel.foster.demo@student.manchester.ac.uk",
-        "display_name": "Daniel Foster",
+        "email": "daniel.boateng.demo@student.manchester.ac.uk",
+        "display_name": "Daniel Boateng",
         "course": "Philosophy",
         "year": 3,
         "faculty": "Humanities",
         "age": 22,
-        "bio": "Philosophy major and existentialist playlist curator. Lana Del Rey understands me better than most people.",
-        "hobbies": "Writing, Hiking, Film photography",
-        "profile_picture": "https://i.pravatar.cc/300?img=52",
+        "bio": "Philosophy major and gospel playlist curator. Jonathan McReynolds understands the deep questions better than most of my lecturers.",
+        "hobbies": "Writing, Hiking, Gospel choir",
+        "profile_picture": "https://randomuser.me/api/portraits/men/15.jpg",
         "is_match": False,
         "seed_id": 10008,
         "messages": [],
     },
     {
-        "email": "chloe.martinez.demo@student.manchester.ac.uk",
-        "display_name": "Chloe Martinez",
+        "email": "zoe.williams.demo@student.manchester.ac.uk",
+        "display_name": "Zoe Williams",
         "course": "Psychology",
         "year": 1,
         "faculty": "Humanities",
         "age": 19,
-        "bio": "First year psych student. Obsessed with Phoebe Bridgers and sad indie. I promise I'm fine 😅",
-        "hobbies": "Journaling, Running, Pottery",
-        "profile_picture": "https://i.pravatar.cc/300?img=44",
+        "bio": "First year psych student. Obsessed with Maverick City Music and Phil Thompson. Worship music is genuinely the best therapy 😅",
+        "hobbies": "Journaling, Running, Praise team",
+        "profile_picture": "https://randomuser.me/api/portraits/women/17.jpg",
         "is_match": False,
         "seed_id": 10009,
         "messages": [],
     },
     {
-        "email": "noah.thompson.demo@student.manchester.ac.uk",
-        "display_name": "Noah Thompson",
+        "email": "michael.asante.demo@student.manchester.ac.uk",
+        "display_name": "Michael Asante",
         "course": "Medicine",
         "year": 4,
         "faculty": "Biology, Medicine and Health",
         "age": 23,
-        "bio": "Med student kept alive by Kendrick Lamar and caffeine. Nearly at the finish line 🏥",
-        "hobbies": "Gym, Chess, Podcasts",
-        "profile_picture": "https://i.pravatar.cc/300?img=67",
+        "bio": "Med student kept alive by Chandler Moore and Maverick City. 'Joyful' is my revision playlist and I'm not apologising for it 🏥",
+        "hobbies": "Gym, Chess, Campus worship",
+        "profile_picture": "https://randomuser.me/api/portraits/men/19.jpg",
         "is_match": False,
         "seed_id": 10010,
+        "messages": [],
+    },
+    {
+        "email": "faith.ojo.demo@student.manchester.ac.uk",
+        "display_name": "Faith Ojo",
+        "course": "Law",
+        "year": 2,
+        "faculty": "Humanities",
+        "age": 20,
+        "bio": "Law student with a heart for African gospel. Dunsin Oyekan and Theophilus Sunday are permanently on repeat. Manchester gospel scene is so underrated!",
+        "hobbies": "Spoken word, Netball, Church choir",
+        "profile_picture": "https://randomuser.me/api/portraits/women/21.jpg",
+        "is_match": False,
+        "seed_id": 10011,
+        "messages": [],
+    },
+    {
+        "email": "samuel.kwame.demo@student.manchester.ac.uk",
+        "display_name": "Samuel Kwame",
+        "course": "Economics",
+        "year": 3,
+        "faculty": "Social Sciences",
+        "age": 22,
+        "bio": "Economics student by day, gospel music enthusiast always. Fred Hammond and Kirk Franklin taught me more about community than any textbook.",
+        "hobbies": "Basketball, Chess, Worship production",
+        "profile_picture": "https://randomuser.me/api/portraits/men/23.jpg",
+        "is_match": False,
+        "seed_id": 10012,
+        "messages": [],
+    },
+    {
+        "email": "naomi.phillips.demo@student.manchester.ac.uk",
+        "display_name": "Naomi Phillips",
+        "course": "Education",
+        "year": 1,
+        "faculty": "Humanities",
+        "age": 19,
+        "bio": "Future teacher who believes music education starts with gospel. CeCe Winans and Yolanda Adams — these voices shaped who I am!",
+        "hobbies": "Teaching Sunday school, Running, Pottery",
+        "profile_picture": "https://randomuser.me/api/portraits/women/25.jpg",
+        "is_match": False,
+        "seed_id": 10013,
+        "messages": [],
+    },
+    {
+        "email": "aaron.clarke.demo@student.manchester.ac.uk",
+        "display_name": "Aaron Clarke",
+        "course": "Civil Engineering",
+        "year": 2,
+        "faculty": "Science and Engineering",
+        "age": 21,
+        "bio": "Engineer building bridges by day, worshipping with Elevation Worship by night. 'Do It Again' has gotten me through every single deadline 🏗️",
+        "hobbies": "Gym, Reading, Worship team sound",
+        "profile_picture": "https://randomuser.me/api/portraits/men/27.jpg",
+        "is_match": False,
+        "seed_id": 10014,
         "messages": [],
     },
 ]
@@ -203,6 +310,10 @@ DEMO_STUDENTS = [
 def _get_or_create_demo_user(db: Session, data: dict) -> User:
     existing = get_user_by_email(db, data["email"])
     if existing:
+        # Keep profile picture up to date in case we changed it
+        if existing.profile_picture != data["profile_picture"]:
+            existing.profile_picture = data["profile_picture"]
+            db.commit()
         return existing
     user = User(
         email=data["email"],
@@ -230,6 +341,8 @@ def seed_demo_users(db: Session, real_user_id: int) -> None:
     """
     Create demo students and wire up pre-matches for the pitch demo.
     Idempotent — safe to call on every login.
+    Swipes for non-matched demo users are cleared each login so they
+    always reappear in the match feed (at least 8 people to discover).
     """
     # Ensure the real user has a music profile (needed for compatibility scoring)
     real_profile = get_music_profile(db, real_user_id)
@@ -252,9 +365,16 @@ def seed_demo_users(db: Session, real_user_id: int) -> None:
         _seed_daily_tune(db, demo_user.id, DEMO_TUNES[i % len(DEMO_TUNES)], real_user_id)
 
         if not data["is_match"]:
+            # Reset the real user's swipe on this person each login
+            # so they always reappear in the feed (fresh candidates every session)
+            db.query(Swipe).filter(
+                Swipe.user_id == real_user_id,
+                Swipe.target_user_id == demo_user.id,
+            ).delete(synchronize_session=False)
+            db.commit()
             continue
 
-        # Already matched? Skip
+        # Already matched? Skip match creation but still ensure messages exist
         already_matched = db.query(Match).filter(
             or_(
                 (Match.user1_id == real_user_id) & (Match.user2_id == demo_user.id),
@@ -305,16 +425,38 @@ def seed_demo_users(db: Session, real_user_id: int) -> None:
 
 
 def _seed_daily_tune(db: Session, demo_user_id: int, tune: dict, real_user_id: int) -> None:
-    """Post a daily tune for the demo user if they haven't posted one yet."""
+    """Post a daily tune for the demo user.
+    On every login, backfills cover_image and preview_url using Spotify search
+    so album art and playback work correctly for all demo posts.
+    """
+    # Fetch real metadata from Spotify (cover image + preview URL + correct ID)
+    meta = _fetch_track_metadata(db, real_user_id, tune["song_name"], tune["artist"])
+
     existing = db.query(DailyTune).filter(DailyTune.user_id == demo_user_id).first()
     if existing:
+        # Backfill missing fields on already-seeded tunes
+        changed = False
+        if meta.get("cover_image") and not existing.cover_image:
+            existing.cover_image = meta["cover_image"]
+            changed = True
+        if meta.get("preview_url") and not existing.preview_url:
+            existing.preview_url = meta["preview_url"]
+            changed = True
+        if meta.get("spotify_id") and not existing.spotify_id:
+            existing.spotify_id = meta["spotify_id"]
+            changed = True
+        if changed:
+            db.commit()
         return
+
     daily_tune = DailyTune(
         user_id=demo_user_id,
         song_name=tune["song_name"],
         artist=tune["artist"],
-        spotify_id=tune["spotify_id"],
-        spotify_url=tune["spotify_url"],
+        spotify_id=meta.get("spotify_id") or tune["spotify_id"],
+        spotify_url=meta.get("spotify_url") or tune["spotify_url"],
+        cover_image=meta.get("cover_image"),
+        preview_url=meta.get("preview_url"),
     )
     db.add(daily_tune)
     db.commit()
@@ -333,10 +475,10 @@ def _create_demo_playlist(db: Session, match: Match, real_user_id: int, demo_use
         return
     playlist = create_playlist(
         db,
-        name=f"{real_user.display_name} & {demo_user.display_name}'s Mix",
+        name=f"{real_user.display_name} & {demo_user.display_name}'s Worship Mix",
         created_by=real_user_id,
         playlist_type="match",
-        description=f"Your shared playlist — built on {match.compatibility_score:.0f}% music compatibility!",
+        description=f"Your shared gospel playlist — built on {match.compatibility_score:.0f}% music compatibility!",
         match_id=match.id,
         tracks=[],
     )

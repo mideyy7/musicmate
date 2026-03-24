@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { spotifyCallback, syncSpotifyProfile } from '../services/api';
 
@@ -7,8 +7,12 @@ export default function SpotifyCallbackPage() {
   const navigate = useNavigate();
   const [status, setStatus] = useState('Connecting to Spotify...');
   const [error, setError] = useState('');
+  const handledRef = useRef(false);
 
   useEffect(() => {
+    if (handledRef.current) return;
+    handledRef.current = true;
+
     const code = searchParams.get('code');
     const errorParam = searchParams.get('error');
 
@@ -33,7 +37,7 @@ export default function SpotifyCallbackPage() {
           // Sync failure is non-fatal — homepage will auto-sync on load
         }
         setStatus('All done! Redirecting...');
-        setTimeout(() => navigate('/', { replace: true }), 400);
+        setTimeout(() => navigate('/home', { replace: true }), 400);
       } catch (err) {
         setError(err.message);
       }
@@ -51,7 +55,7 @@ export default function SpotifyCallbackPage() {
             <button
               className="btn-primary"
               style={{ marginTop: '1rem' }}
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/home')}
             >
               Back to Dashboard
             </button>
