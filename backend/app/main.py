@@ -24,6 +24,7 @@ with engine.connect() as _conn:
         ("spotify_id", "VARCHAR"),
         ("spotify_url", "VARCHAR"),
         ("cover_image", "VARCHAR"),
+        ("preview_url", "VARCHAR"),
     ]:
         try:
             _conn.execute(text(f"ALTER TABLE daily_tunes ADD COLUMN {_col} {_type}"))

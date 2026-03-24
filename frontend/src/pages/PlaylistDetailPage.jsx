@@ -10,6 +10,7 @@ import {
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import SongSearchModal from '../components/SongSearchModal';
+import TrackActions from '../components/TrackActions';
 
 export default function PlaylistDetailPage() {
   const { playlistId } = useParams();
@@ -198,6 +199,7 @@ export default function PlaylistDetailPage() {
                       <span className="track-album">{track.album}</span>
                     )}
                   </div>
+                  <TrackActions track={track} />
                   <button
                     className="track-remove-btn"
                     onClick={() => handleRemoveTrack(track.spotify_id)}

@@ -17,6 +17,7 @@ class PostTuneRequest(BaseModel):
     spotify_id: str | None = None
     spotify_url: str | None = None
     cover_image: str | None = None
+    preview_url: str | None = None
 
 class ReactRequest(BaseModel):
     reaction_type: str  # "like" or "dislike"
@@ -46,6 +47,7 @@ def get_post_response(tune: DailyTune, db: Session, current_user_id: int):
         "spotify_id": tune.spotify_id,
         "spotify_url": tune.spotify_url,
         "cover_image": tune.cover_image,
+        "preview_url": tune.preview_url,
         "likes": likes,
         "dislikes": dislikes,
         "my_reaction": my_reaction.reaction_type if my_reaction else None,
@@ -78,6 +80,7 @@ def post_tune(req: PostTuneRequest, db: Session = Depends(get_db), current_user:
         spotify_id=req.spotify_id,
         spotify_url=req.spotify_url,
         cover_image=req.cover_image,
+        preview_url=req.preview_url,
     )
     db.add(tune)
 

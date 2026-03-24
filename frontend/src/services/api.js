@@ -224,10 +224,10 @@ export function getPosts() {
   return request('/posts');
 }
 
-export function postTune({ song_name, artist, spotify_id, spotify_url, cover_image }) {
+export function postTune({ song_name, artist, spotify_id, spotify_url, cover_image, preview_url }) {
   return request('/posts', {
     method: 'POST',
-    body: JSON.stringify({ song_name, artist, spotify_id, spotify_url, cover_image }),
+    body: JSON.stringify({ song_name, artist, spotify_id, spotify_url, cover_image, preview_url }),
   });
 }
 

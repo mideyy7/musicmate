@@ -228,6 +228,18 @@ def spotify_save_track(
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"Failed to save track: {str(e)}")
 
 
+@router.get("/token")
+def get_spotify_token(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return a valid Spotify access token for the Web Playback SDK."""
+    if is_mock_mode():
+        return {"access_token": None}
+    access_token = _get_valid_token(db, current_user.id)
+    return {"access_token": access_token}
+
+
 @router.delete("/disconnect")
 def spotify_disconnect(
     current_user: User = Depends(get_current_user),

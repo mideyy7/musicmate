@@ -80,7 +80,7 @@ SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
 SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_API_BASE = "https://api.spotify.com/v1"
 
-SCOPES = "user-top-read user-read-recently-played user-read-playback-state user-library-read user-library-modify playlist-modify-public playlist-modify-private"
+SCOPES = "user-top-read user-read-recently-played user-read-playback-state user-library-read user-library-modify playlist-modify-public playlist-modify-private streaming user-modify-playback-state"
 
 
 def get_auth_url(state: str = "") -> str:
@@ -184,6 +184,8 @@ def fetch_top_tracks(access_token: str, limit: int = 20, time_range: str = "medi
             "album": track["album"]["name"],
             "image_url": track["album"]["images"][0]["url"] if track["album"].get("images") else None,
             "spotify_id": track["id"],
+            "spotify_url": track["external_urls"].get("spotify"),
+            "preview_url": track.get("preview_url"),
         }
         for track in items
     ]
@@ -211,6 +213,8 @@ def fetch_recent_tracks(access_token: str, limit: int = 20) -> list[dict]:
             ),
             "played_at": item.get("played_at"),
             "spotify_id": item["track"]["id"],
+            "spotify_url": item["track"]["external_urls"].get("spotify"),
+            "preview_url": item["track"].get("preview_url"),
         }
         for item in items
     ]
@@ -262,6 +266,7 @@ def search_tracks(access_token: str, query: str, limit: int = 10) -> list[dict]:
             "image_url": track["album"]["images"][0]["url"] if track["album"].get("images") else None,
             "spotify_id": track["id"],
             "spotify_url": track["external_urls"].get("spotify"),
+            "preview_url": track.get("preview_url"),
         }
         for track in items
     ]

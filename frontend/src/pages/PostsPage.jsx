@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getPosts, postTune, reactToTune, searchSpotifySongs, saveTrackToSpotify } from '../services/api';
 import NavBar from '../components/NavBar';
+import TrackActions from '../components/TrackActions';
 
 function SpotifyIcon() {
   return (
@@ -8,16 +9,6 @@ function SpotifyIcon() {
       <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.516 17.307a.75.75 0 01-1.031.249c-2.824-1.724-6.38-2.114-10.566-1.158a.75.75 0 01-.332-1.463c4.584-1.044 8.516-.594 11.68 1.341a.75.75 0 01.249 1.031zm1.472-3.27a.937.937 0 01-1.288.312c-3.23-1.985-8.155-2.56-11.973-1.401a.937.937 0 01-.527-1.797c4.368-1.28 9.787-.66 13.476 1.598a.938.938 0 01.312 1.288zm.127-3.405C15.31 8.39 9.2 8.19 5.545 9.3a1.125 1.125 0 01-.637-2.155C9.23 5.888 15.97 6.118 20.26 8.6a1.125 1.125 0 01-1.145 1.942 1.033 1.033 0 010-.91z"/>
     </svg>
   );
-}
-
-function openSpotify(post) {
-  if (post.spotify_url) {
-    window.open(post.spotify_url, '_blank', 'noopener');
-  } else if (post.spotify_id) {
-    window.open(`https://open.spotify.com/track/${post.spotify_id}`, '_blank', 'noopener');
-  } else {
-    window.open(`https://open.spotify.com/search/${encodeURIComponent(`${post.song_name} ${post.artist}`)}`, '_blank', 'noopener');
-  }
 }
 
 export default function PostsPage() {
@@ -77,7 +68,7 @@ export default function PostsPage() {
     setError('');
     try {
       const payload = selectedTrack
-        ? { song_name: selectedTrack.track_name, artist: selectedTrack.artist, spotify_id: selectedTrack.spotify_id, spotify_url: selectedTrack.spotify_url, cover_image: selectedTrack.image_url }
+        ? { song_name: selectedTrack.track_name, artist: selectedTrack.artist, spotify_id: selectedTrack.spotify_id, spotify_url: selectedTrack.spotify_url, cover_image: selectedTrack.image_url, preview_url: selectedTrack.preview_url }
         : { song_name: query.trim(), artist: '' };
       const newPost = await postTune(payload);
       setPosts(prev => [newPost, ...prev]);
@@ -227,14 +218,7 @@ export default function PostsPage() {
                       <div className="post-song-name">{post.song_name}</div>
                       <div className="post-song-artist">{post.artist}</div>
                     </div>
-                    <button
-                      className="post-play-btn"
-                      title="Play on Spotify"
-                      onClick={() => openSpotify(post)}
-                      style={{ color: '#1db954' }}
-                    >
-                      ▶
-                    </button>
+                    <TrackActions track={{ track_name: post.song_name, artist: post.artist, spotify_id: post.spotify_id, spotify_url: post.spotify_url, preview_url: post.preview_url }} />
                   </div>
 
                   <div className="post-actions">

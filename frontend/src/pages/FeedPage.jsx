@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getCampusPulse } from '../services/api';
 import NavBar from '../components/NavBar';
+import TrackActions from '../components/TrackActions';
 
 // Mock fallback data matching screenshots
 const MOCK_DATA = {
@@ -103,16 +104,7 @@ export default function FeedPage() {
                     <div className="top50-song">{item.song_name}</div>
                     <div className="top50-artist">{item.artist}</div>
                   </div>
-                  <button
-                    onClick={() => {
-                      const url = item.spotify_url || item.spotify_id
-                        ? `https://open.spotify.com/track/${item.spotify_id}`
-                        : `https://open.spotify.com/search/${encodeURIComponent(`${item.song_name} ${item.artist}`)}`;
-                      window.open(url, '_blank', 'noopener');
-                    }}
-                    title="Play on Spotify"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1db954', fontSize: '1rem', padding: '0 4px', marginLeft: 'auto', flexShrink: 0 }}
-                  >▶</button>
+                  <TrackActions track={{ track_name: item.song_name, artist: item.artist, spotify_id: item.spotify_id, spotify_url: item.spotify_url, preview_url: item.preview_url }} />
                 </div>
               ))}
             </div>
@@ -139,16 +131,7 @@ export default function FeedPage() {
                       <div className="friend-fav-playing">{fav.display_name} is playing...</div>
                       <div className="friend-fav-song">{fav.song_name} - {fav.artist}</div>
                     </div>
-                    <button
-                      onClick={() => {
-                        const url = fav.spotify_url || fav.spotify_id
-                          ? `https://open.spotify.com/track/${fav.spotify_id}`
-                          : `https://open.spotify.com/search/${encodeURIComponent(`${fav.song_name} ${fav.artist}`)}`;
-                        window.open(url, '_blank', 'noopener');
-                      }}
-                      title="Play on Spotify"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1db954', fontSize: '1rem', padding: '0 4px', marginLeft: 'auto', flexShrink: 0 }}
-                    >▶</button>
+                    <TrackActions track={{ track_name: fav.song_name, artist: fav.artist, spotify_id: fav.spotify_id, spotify_url: fav.spotify_url, preview_url: fav.preview_url }} />
                   </div>
                 ))
               )}

@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     SPOTIFY_CLIENT_SECRET: str = ""
     SPOTIFY_REDIRECT_URI: str = "http://127.0.0.1:5173/spotify/callback"
 
+    LASTFM_API_KEY: str = ""
+
     # Set FORCE_MOCK_MODE=true in .env to always use mock Spotify data (useful for demos)
     FORCE_MOCK_MODE: bool = False
 

@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { SpotifyPlayerProvider } from './context/SpotifyPlayerContext';
+import MiniPlayer from './components/MiniPlayer';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import SSOPage from './pages/SSOPage';
@@ -16,6 +18,7 @@ import './App.css';
 function App() {
   return (
     <AuthProvider>
+      <SpotifyPlayerProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -81,6 +84,8 @@ function App() {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
+      <MiniPlayer />
+      </SpotifyPlayerProvider>
     </AuthProvider>
   );
 }

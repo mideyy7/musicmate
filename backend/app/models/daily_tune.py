@@ -11,6 +11,7 @@ class DailyTune(Base):
     spotify_id = Column(String, nullable=True)
     spotify_url = Column(String, nullable=True)
     cover_image = Column(String, nullable=True)
+    preview_url = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class Reaction(Base):

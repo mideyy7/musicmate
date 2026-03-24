@@ -1,21 +1,12 @@
 import { useState } from 'react';
 import { syncSpotifyProfile, disconnectSpotify, saveTrackToSpotify } from '../services/api';
+import TrackActions from './TrackActions';
 
 function openSpotifyArtist(artist) {
   if (artist.spotify_url) {
     window.open(artist.spotify_url, '_blank', 'noopener');
   } else {
     window.open(`https://open.spotify.com/search/${encodeURIComponent(artist.name)}`, '_blank', 'noopener');
-  }
-}
-
-function openSpotifyTrack(track) {
-  if (track.spotify_url) {
-    window.open(track.spotify_url, '_blank', 'noopener');
-  } else if (track.spotify_id) {
-    window.open(`https://open.spotify.com/track/${track.spotify_id}`, '_blank', 'noopener');
-  } else {
-    window.open(`https://open.spotify.com/search/${encodeURIComponent(`${track.name} ${track.artist}`)}`, '_blank', 'noopener');
   }
 }
 
@@ -163,12 +154,8 @@ export default function MusicProfile({ profile, onUpdate, onDisconnect }) {
                   <span className="track-name">{track.name}</span>
                   <span className="track-artist">{track.artist}</span>
                 </div>
-                <div style={{ display: 'flex', gap: '0.4rem', marginLeft: 'auto', flexShrink: 0 }}>
-                  <button
-                    onClick={() => openSpotifyTrack(track)}
-                    title="Play on Spotify"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1db954', fontSize: '1rem', padding: '0 4px' }}
-                  >▶</button>
+                <div style={{ display: 'flex', gap: '0.4rem', marginLeft: 'auto', flexShrink: 0, alignItems: 'center' }}>
+                  <TrackActions track={track} />
                   <button
                     onClick={() => handleSaveTrack(track, `track-${i}`)}
                     title="Save to Liked Songs"
