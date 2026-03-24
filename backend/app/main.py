@@ -17,27 +17,17 @@ from app.api.routes.feed import router as feed_router
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
-# SQLite column migrations — add new columns to existing tables without dropping data
-from sqlalchemy import text
-with engine.connect() as _conn:
-    for _col, _type in [
-        ("spotify_id", "VARCHAR"),
-        ("spotify_url", "VARCHAR"),
-        ("cover_image", "VARCHAR"),
-        ("preview_url", "VARCHAR"),
-    ]:
-        try:
-            _conn.execute(text(f"ALTER TABLE daily_tunes ADD COLUMN {_col} {_type}"))
-            _conn.commit()
-        except Exception:
-            pass  # Column already exists
-
 app = FastAPI(title="MusicMate API")
 
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "https://*.vercel.app"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://*.vercel.app",
+        "https://*.onrender.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -65,7 +55,7 @@ def root():
 if __name__ == "__main__":
     uvicorn.run(
         "app.main:app",
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=8000,
         reload=True,
     )
