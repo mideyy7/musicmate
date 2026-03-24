@@ -159,88 +159,84 @@ export function SpotifyPlayerProvider({ children }) {
   }
 
   // playTrack(spotifyId, previewUrl?, trackInfo?)
-  // 1. If SDK ready → use full Spotify playback
-  // 2. Else → fall back to 30-second audio preview
+  // Strategy: if previewUrl is known, play it IMMEDIATELY (before any awaits) to
+  // preserve the browser's user-gesture context, then attempt SDK upgrade in parallel.
+  // This avoids autoplay-policy blocking that occurs after awaited network calls.
   async function playTrack(spotifyId, previewUrl, trackInfo) {
     if (!spotifyId) return;
 
-    // --- SDK path ---
-    if (isReady && deviceIdRef.current) {
-      // Same track via SDK: toggle
-      if (currentTrackId === spotifyId && audioTrackIdRef.current !== spotifyId) {
-        if (isPlaying) {
-          playerRef.current?.pause();
-        } else {
-          playerRef.current?.resume();
-        }
-        return;
-      }
+    // --- Toggle same track ---
+    if (audioTrackIdRef.current === spotifyId) {
+      if (audioRef.current.paused) audioRef.current.play().catch(() => {});
+      else audioRef.current.pause();
+      return;
+    }
+    if (isReady && currentTrackId === spotifyId && audioTrackIdRef.current !== spotifyId) {
+      if (isPlaying) playerRef.current?.pause();
+      else playerRef.current?.resume();
+      return;
+    }
 
+    const knownUrl = previewUrl || null;
+
+    // --- If preview URL is already known: play it NOW (within user gesture context) ---
+    if (knownUrl) {
+      audioRef.current.pause();
+      audioRef.current.src = knownUrl;
+      audioTrackIdRef.current = spotifyId;
+      setCurrentTrackId(spotifyId);
+      setCurrentTrackInfo(trackInfo || { name: 'Preview', artist: '' });
+      // Call play() synchronously before any awaits — user gesture context is still active
+      audioRef.current.play().catch(() => { setIsPlaying(false); });
+
+      // In parallel: try to upgrade to full SDK playback (Premium). If it succeeds,
+      // player_state_changed will fire and stop the audio preview automatically.
+      if (isReady && deviceIdRef.current) {
+        const token = await fetchFreshToken();
+        if (token) {
+          fetch(
+            `https://api.spotify.com/v1/me/player/play?device_id=${deviceIdRef.current}`,
+            {
+              method: 'PUT',
+              headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ uris: [`spotify:track:${spotifyId}`] }),
+            }
+          ).catch(() => {}); // SDK failure is fine — audio preview continues
+        }
+      }
+      return;
+    }
+
+    // --- No preview URL: try SDK first, then fetch preview ---
+    if (isReady && deviceIdRef.current) {
       const token = await fetchFreshToken();
       if (token) {
         const res = await fetch(
           `https://api.spotify.com/v1/me/player/play?device_id=${deviceIdRef.current}`,
           {
             method: 'PUT',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ uris: [`spotify:track:${spotifyId}`] }),
           }
         );
-        if (res.ok || res.status === 204) {
-          // Stop audio fallback if running
-          if (audioRef.current && !audioRef.current.paused) {
-            audioRef.current.pause();
-            audioRef.current.src = '';
-            audioTrackIdRef.current = null;
-          }
-          return;
-        }
-        // SDK play failed — fall through to preview
+        if (res.ok || res.status === 204) return; // SDK playing full track
       }
     }
 
-    // --- Audio preview fallback ---
-    // Toggle if same track
-    if (audioTrackIdRef.current === spotifyId) {
-      if (audioRef.current.paused) {
-        await audioRef.current.play().catch(() => {});
-      } else {
-        audioRef.current.pause();
-      }
-      return;
-    }
-
-    // Get preview URL
-    let url = previewUrl || null;
+    // Fetch preview URL on demand (user gesture may be expired — best effort)
+    const url = await fetchPreviewUrl(spotifyId);
     if (!url) {
-      url = await fetchPreviewUrl(spotifyId);
-    }
-
-    if (!url) {
-      // No preview available — show in mini player but can't play audio
       setCurrentTrackId(spotifyId);
       setCurrentTrackInfo(trackInfo || { name: 'No preview available', artist: 'Open in Spotify to listen' });
       setIsPlaying(false);
       return;
     }
-
-    // Stop whatever was playing
-    if (isReady && playerRef.current) {
-      await playerRef.current.pause().catch(() => {});
-    }
     audioRef.current.pause();
-
-    // Play preview
     audioRef.current.src = url;
     audioTrackIdRef.current = spotifyId;
     setCurrentTrackId(spotifyId);
     setCurrentTrackInfo(trackInfo || { name: 'Preview', artist: '' });
-    await audioRef.current.play().catch(() => {
-      setIsPlaying(false);
-    });
+    await audioRef.current.play().catch(() => { setIsPlaying(false); });
   }
 
   return (
