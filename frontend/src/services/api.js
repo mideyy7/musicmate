@@ -209,7 +209,7 @@ export async function uploadProfilePicture(file) {
   const token = localStorage.getItem('token');
   const formData = new FormData();
   formData.append('file', file);
-  const response = await fetch('/api/auth/me/picture', {
+  const response = await fetch(`${API_BASE}/auth/me/picture`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
     body: formData,
