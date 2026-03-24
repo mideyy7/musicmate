@@ -165,18 +165,7 @@ Students authenticate via the University of Manchester CAS server. The flow:
 
 An email-based signup flow for `@manchester.ac.uk` and `@student.manchester.ac.uk` addresses, with password authentication for returning users.
 
----
 
-## Demo Mode
-
-On first login, 14 demo students are automatically seeded for pitch/demo purposes:
-
-- **6 pre-matched** — already matched with you, with chat messages and shared playlists
-- **8 in the swipe feed** — appear as fresh candidates each session
-
-Demo data is idempotent and resets swipe history on each login so the feed always has people to discover. Set `FORCE_MOCK_MODE=true` to use mock Spotify profiles instead of real API data.
-
----
 
 ## API Overview
 
