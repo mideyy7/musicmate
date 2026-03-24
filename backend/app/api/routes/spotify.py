@@ -236,8 +236,11 @@ def get_spotify_token(
     """Return a valid Spotify access token for the Web Playback SDK."""
     if is_mock_mode():
         return {"access_token": None}
-    access_token = _get_valid_token(db, current_user.id)
-    return {"access_token": access_token}
+    try:
+        access_token = _get_valid_token(db, current_user.id)
+        return {"access_token": access_token}
+    except HTTPException:
+        return {"access_token": None}
 
 
 @router.get("/preview/{track_id}")

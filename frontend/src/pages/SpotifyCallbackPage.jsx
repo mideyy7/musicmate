@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { spotifyCallback, syncSpotifyProfile } from '../services/api';
 
@@ -7,8 +7,12 @@ export default function SpotifyCallbackPage() {
   const navigate = useNavigate();
   const [status, setStatus] = useState('Connecting to Spotify...');
   const [error, setError] = useState('');
+  const handledRef = useRef(false);
 
   useEffect(() => {
+    if (handledRef.current) return;
+    handledRef.current = true;
+
     const code = searchParams.get('code');
     const errorParam = searchParams.get('error');
 
